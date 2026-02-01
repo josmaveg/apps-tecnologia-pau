@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+Apps Tecnología Industrial - 2º Bachillerato
+Copyright © 2025 José Manuel Vega. Todos los derechos reservados.
+
+Este código está protegido por derechos de autor.
+Prohibida su copia, modificación o redistribución sin permiso expreso.
+
+Contacto: josmavega@gmail.com
+Instagram: @_tecnologiaymas
+================================================================================
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps Tecnología Industrial - 2º Bachillerato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .app-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .app-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-left-color: #3b82f6;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-termo { background-color: #fee2e2; color: #991b1b; }
+        .badge-mecanica { background-color: #dbeafe; color: #1e40af; }
+        .badge-electrica { background-color: #fef3c7; color: #92400e; }
+        .badge-materiales { background-color: #d1fae5; color: #065f46; }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 24px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- HEADER / HERO -->
+    <header class="hero-gradient text-white py-20 px-4">
+        <div class="max-w-5xl mx-auto text-center">
+            <h1 class="text-5xl font-extrabold mb-4">
+                Apps Interactivas de Tecnología Industrial
+            </h1>
+            <p class="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+                Herramientas educativas para estudiantes de 2º Bachillerato preparando la PAU
+            </p>
+            <div class="flex flex-wrap gap-3 justify-center text-sm">
+                <span class="badge bg-white text-purple-700">✓ Simuladores Interactivos</span>
+                <span class="badge bg-white text-purple-700">✓ Cálculos Paso a Paso</span>
+                <span class="badge bg-white text-purple-700">✓ Visualización Dinámica</span>
+                <span class="badge bg-white text-purple-700">✓ Gratis y Open Source</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-6xl mx-auto px-4 py-16">
+        
+        <!-- INTRODUCCIÓN -->
+        <section class="mb-16 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">
+                Aprende Tecnología Industrial con Simulaciones Reales
+            </h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Colección de aplicaciones web diseñadas específicamente para ayudarte a comprender 
+                los conceptos clave de Tecnología Industrial mediante visualización interactiva y 
+                cálculos detallados paso a paso.
+            </p>
+        </section>
+
+        <!-- APPS GRID -->
+        <section>
+            <h3 class="text-2xl font-bold text-gray-800 mb-8 text-center">
+                Explora las Aplicaciones por Bloques
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- APP 1: MOTORES OTTO VS DIESEL -->
+                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='motores-otto-diesel.html'">
+                    <div class="feature-icon bg-red-100 text-red-600">
+                        🔥
+                    </div>
+                    <span class="badge badge-termo mb-3">TERMODINÁMICA</span>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">
+                        Comparador Motores Otto vs Diesel
+                    </h4>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                        Simulación completa de los 4 tiempos con animación visual del cilindro, 
+                        diagrama P-V teórico, y cálculo de eficiencia térmica según relación de compresión.
+                    </p>
+                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                        <span>• Animación de pistón</span>
+                        <span>• Ciclo termodinámico</span>
+                        <span>• Diagrama P-V</span>
+                    </div>
+                </article>
+
+                <!-- APP 2: ENSAYO DE TRACCIÓN -->
+                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='ensayo-traccion.html'">
+                    <div class="feature-icon bg-green-100 text-green-600">
+                        💪
+                    </div>
+                    <span class="badge badge-materiales mb-3">MATERIALES</span>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">
+                        Simulador de Ensayo de Tracción
+                    </h4>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                        Simulación dinámica del comportamiento mecánico de materiales bajo tracción. 
+                        Curva σ-ε completa hasta la fractura con visualización de la probeta deformándose.
+                    </p>
+                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                        <span>• Zona elástica y plástica</span>
+                        <span>• Estricción visual</span>
+                        <span>• Parámetros editables</span>
+                    </div>
+                </article>
+
+                <!-- APP 3: CORRIENTE ALTERNA (CA) -->
+                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='corriente-alterna.html'">
+                    <div class="feature-icon bg-yellow-100 text-yellow-600">
+                        ⚡
+                    </div>
+                    <span class="badge badge-electrica mb-3">ELECTRICIDAD</span>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">
+                        Simulador de Corriente Alterna y Circuitos RLC
+                    </h4>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                        Herramienta dual: visualización de fasores y ondas senoidales (mono/bi/trifásico), 
+                        más calculadora completa de circuitos RLC en serie con triángulo de impedancias.
+                    </p>
+                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                        <span>• Diagramas de Fresnel</span>
+                        <span>• Cálculo RLC paso a paso</span>
+                        <span>• CA y CC</span>
+                    </div>
+                </article>
+
+                <!-- APP 4: ANÁLISIS DE VIGAS -->
+                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='analisis-vigas.html'">
+                    <div class="feature-icon bg-blue-100 text-blue-600">
+                        🏗️
+                    </div>
+                    <span class="badge badge-mecanica mb-3">MECÁNICA</span>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">
+                        Calculadora de Diagramas de Vigas
+                    </h4>
+                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                        Análisis estructural flexible de vigas simplemente apoyadas o en voladizo. 
+                        Cálculo de reacciones, diagramas de cortante (V) y momento flector (M).
+                    </p>
+                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                        <span>• Cargas puntuales y distribuidas</span>
+                        <span>• Diagramas V y M</span>
+                        <span>• Geometría adaptable</span>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- CARACTERÍSTICAS GENERALES -->
+        <section class="mt-20 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-10">
+            <h3 class="text-2xl font-bold text-gray-800 mb-8 text-center">
+                ¿Por qué usar estas aplicaciones?
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="text-4xl mb-3">🎯</div>
+                    <h4 class="font-bold text-gray-800 mb-2">Enfocadas en PAU</h4>
+                    <p class="text-sm text-gray-600">
+                        Diseñadas específicamente para los contenidos que realmente aparecen en Selectividad
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-3">📊</div>
+                    <h4 class="font-bold text-gray-800 mb-2">Paso a Paso</h4>
+                    <p class="text-sm text-gray-600">
+                        Todos los cálculos explicados en detalle con fórmulas y razonamiento completo
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-3">💻</div>
+                    <h4 class="font-bold text-gray-800 mb-2">Sin Instalación</h4>
+                    <p class="text-sm text-gray-600">
+                        Funcionan directamente en el navegador, sin descargas ni plugins necesarios
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECOMENDACIONES DE USO -->
+        <section class="mt-16 bg-white rounded-xl shadow-lg p-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                📚 Recomendaciones de Uso
+            </h3>
+            <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">1️⃣</span>
+                    <div>
+                        <h4 class="font-semibold text-gray-800">Primero la teoría</h4>
+                        <p class="text-sm text-gray-600">Revisa tus apuntes antes de usar los simuladores para entender los conceptos base</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">2️⃣</span>
+                    <div>
+                        <h4 class="font-semibold text-gray-800">Experimenta con valores</h4>
+                        <p class="text-sm text-gray-600">Cambia los parámetros para ver cómo afectan a los resultados y entender las relaciones</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">3️⃣</span>
+                    <div>
+                        <h4 class="font-semibold text-gray-800">Lee los pasos de cálculo</h4>
+                        <p class="text-sm text-gray-600">No te quedes solo con el resultado final, comprende el proceso completo</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">4️⃣</span>
+                    <div>
+                        <h4 class="font-semibold text-gray-800">Practica ejercicios reales</h4>
+                        <p class="text-sm text-gray-600">Usa las apps para verificar tus cálculos de problemas de exámenes anteriores</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-800 text-gray-300 py-12 px-4 mt-20">
+        <div class="max-w-5xl mx-auto text-center">
+            <h3 class="text-xl font-bold text-white mb-4">
+                Apps Tecnología Industrial 2º Bach
+            </h3>
+            <p class="text-sm mb-6 max-w-2xl mx-auto">
+                Proyecto educativo creado por José Manuel Vega, profesor de Tecnología, 
+                para ayudar a estudiantes de 2º Bachillerato a preparar la PAU.
+            </p>
+            <div class="flex justify-center gap-6 text-sm">
+                <a href="https://github.com/josmavega/apps-tecnologia-pau" target="_blank" class="hover:text-white transition">
+                    📁 Repositorio GitHub
+                </a>
+                <span>|</span>
+                <a href="mailto:josmavega@gmail.com" class="hover:text-white transition">
+                    ✉️ josmavega@gmail.com
+                </a>
+                <span>|</span>
+                <a href="https://instagram.com/_tecnologiaymas" target="_blank" class="hover:text-white transition">
+                    📱 @_tecnologiaymas
+                </a>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-xs text-gray-400">
+                © 2025 José Manuel Vega - Todos los derechos reservados | 
+                Uso educativo personal permitido | Prohibida la redistribución sin permiso
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

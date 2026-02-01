@@ -11,4 +11,657 @@ Instagram: @_tecnologiaymas
 ================================================================================
 -->
 
-<!-- Aquí irá tu código HTML del Comparador Motores Otto vs Diesel -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador Motores Otto vs Diesel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- ESTILOS VISUALES DEL MOTOR --- */
+        .cylinder-container {
+            width: 150px;
+            height: 300px;
+            background-color: #e2e8f0;
+            border: 8px solid #475569;
+            border-radius: 4px;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
+            transition: border-color 0.5s;
+        }
+        
+        /* El motor Diesel suele ser más robusto */
+        .engine-diesel .cylinder-container {
+            border-color: #1e293b; 
+            background-color: #cbd5e1;
+        }
+
+        .piston {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
+            border-top: 4px solid #64748b;
+            border-bottom: 2px solid #334155;
+            position: absolute;
+            top: 30px; 
+            transition: top 0.5s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1e293b;
+            font-weight: bold;
+            font-size: 0.7rem;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .piston::after {
+            content: '';
+            position: absolute;
+            top: 38px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 400px;
+            background: linear-gradient(90deg, #94a3b8, #cbd5e1, #94a3b8);
+            border-left: 1px solid #64748b;
+            border-right: 1px solid #64748b;
+            z-index: -1;
+        }
+
+        /* Bujía (Visible solo en Otto) */
+        .spark-plug {
+            width: 10px;
+            height: 20px;
+            background-color: #fff;
+            border: 2px solid #333;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            display: block; /* Por defecto Otto */
+        }
+        
+        .spark {
+            width: 20px;
+            height: 20px;
+            background-color: yellow;
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 10px 5px orange;
+            z-index: 15;
+            transition: opacity 0.1s;
+        }
+        .spark.active { opacity: 1; }
+
+        /* Válvulas */
+        .valve {
+            width: 30px;
+            height: 6px;
+            background-color: #333;
+            position: absolute;
+            top: 0;
+            transition: transform 0.2s;
+            z-index: 18;
+            border-bottom-left-radius: 2px;
+            border-bottom-right-radius: 2px;
+        }
+        .valve-intake { left: 20px; background-color: #4b5563; }
+        .valve-exhaust { right: 20px; background-color: #4b5563; }
+        .valve.open { transform: translateY(8px); }
+
+        /* Gases */
+        .gas-volume {
+            position: absolute;
+            top: 0; 
+            width: 100%;
+            background: rgba(255, 255, 255, 0);
+            transition: height 0.5s ease-in-out, background-color 0.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Colores Específicos */
+        .gas-intake-otto { background-color: rgba(135, 206, 235, 0.4); } /* Mezcla Aire/Gasolina */
+        .gas-intake-diesel { background-color: rgba(200, 230, 255, 0.2); } /* Solo Aire (Más claro) */
+        
+        .gas-compression { background-color: rgba(100, 149, 237, 0.7); }
+        .gas-explosion { background-color: rgba(255, 69, 0, 0.85); }
+        .gas-exhaust { background-color: rgba(100, 100, 100, 0.6); }
+
+        #pvDiagram {
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+
+    <div class="container mx-auto max-w-6xl bg-white p-6 rounded-xl shadow-2xl">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold bg-gradient-to-r from-red-600 to-blue-700 bg-clip-text text-transparent inline-block">
+                Comparador Otto vs. Diesel
+            </h1>
+            <p class="text-gray-600 mt-2 text-lg">
+                Análisis Termodinámico de los 4 Tiempos
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- PANEL DE CONTROL -->
+            <div class="lg:col-span-1 bg-gray-50 p-6 rounded-lg shadow-md h-full border border-gray-200 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Configuración</h2>
+                    
+                    <!-- Selector de Motor -->
+                    <div class="mb-6 bg-white p-3 rounded shadow-sm border">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Motor:</label>
+                        <div class="flex space-x-2">
+                            <button onclick="setEngine('otto')" id="btnOtto" class="flex-1 py-2 px-3 rounded text-sm font-bold transition bg-red-600 text-white shadow-md">
+                                Gasolina (Otto)
+                            </button>
+                            <button onclick="setEngine('diesel')" id="btnDiesel" class="flex-1 py-2 px-3 rounded text-sm font-bold transition bg-gray-200 text-gray-700 hover:bg-gray-300">
+                                Diésel
+                            </button>
+                        </div>
+                        <p id="engineDesc" class="text-xs text-gray-500 mt-2 italic">
+                            Encendido por chispa (Bujía). Mezcla aire/combustible.
+                        </p>
+                    </div>
+
+                    <label class="block mb-2 text-sm font-medium text-gray-700">
+                        Relación de Compresión (<span id="compVal">10</span>:1):
+                    </label>
+                    <input type="range" id="compressionRatio" min="6" max="22" step="0.5" value="10" class="w-full mb-4 accent-blue-600">
+
+                    <label class="block mb-2 text-sm font-medium text-gray-700">
+                        Temp. Máx Ciclo (K):
+                    </label>
+                    <input type="number" id="tmax" value="2200" min="1500" max="3500" class="w-full p-2 border rounded mb-6">
+
+                    <!-- Resultados de Eficiencia -->
+                    <div class="p-4 bg-white rounded border border-gray-200 mb-4">
+                        <h3 class="font-bold text-gray-700 text-sm">Eficiencia Térmica Ideal:</h3>
+                        <p id="eficienciaDisplay" class="text-4xl text-blue-600 font-extrabold mt-1">-- %</p>
+                    </div>
+                </div>
+
+                <!-- Botonera -->
+                <div class="grid grid-cols-3 gap-2 mt-4">
+                    <button id="startButton" class="col-span-2 bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 transition shadow">
+                        ▶ ARRANCAR
+                    </button>
+                    <button id="pauseButton" class="bg-yellow-500 text-white font-bold py-3 rounded hover:bg-yellow-600 transition shadow">
+                        ⏸
+                    </button>
+                    <button id="resetButton" class="col-span-3 bg-red-100 text-red-700 border border-red-300 font-bold py-2 rounded hover:bg-red-200 transition mt-1">
+                        ⏹ REINICIAR CICLO
+                    </button>
+                </div>
+            </div>
+
+            <!-- VISUALIZACIÓN MOTOR -->
+            <div id="engineWrapper" class="lg:col-span-1 flex flex-col items-center justify-center p-6 bg-gray-100 rounded-lg shadow-inner border border-gray-300">
+                <h2 class="text-lg font-semibold text-gray-600 mb-2 w-full text-center border-b pb-2">Visualización Mecánica</h2>
+                
+                <div id="cylinder" class="cylinder-container bg-white">
+                    <div class="valve valve-intake" id="valveIntake"></div>
+                    <div class="valve valve-exhaust" id="valveExhaust"></div>
+                    <div class="spark-plug" id="sparkPlug"></div>
+                    <div class="spark" id="sparkFlash"></div>
+                    
+                    <div id="gasVolume" class="gas-volume"></div>
+                    <div id="piston" class="piston"></div>
+                </div>
+
+                <div id="statusContainer" class="w-full mt-4 p-3 bg-white rounded border-l-4 border-gray-400 shadow-sm transition-all duration-300">
+                    <div class="flex justify-between items-center mb-1">
+                        <span id="strokeName" class="font-bold text-lg text-gray-800">DETENIDO</span>
+                        <span class="text-xs font-mono bg-gray-200 px-2 py-1 rounded">T= <span id="tempDisplay">300</span>K</span>
+                    </div>
+                    <p id="thermoDesc" class="text-sm text-gray-600 leading-tight">
+                        Selecciona un motor y pulsa Arrancar.
+                    </p>
+                </div>
+            </div>
+
+            <!-- DIAGRAMA P-V -->
+            <div class="lg:col-span-1 p-6 bg-white rounded-lg shadow-md border border-gray-200 h-full">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Diagrama P-V (Teórico)</h2>
+                <div class="relative w-full flex justify-center">
+                    <canvas id="pvDiagram" width="280" height="280"></canvas>
+                </div>
+                <div class="mt-4 text-xs text-gray-500 space-y-1">
+                    <p><strong>Eje Y (P):</strong> Presión (atm)</p>
+                    <p><strong>Eje X (V):</strong> Volumen (relativo)</p>
+                    <p class="mt-2 text-gray-400">Nota: El diagrama muestra los puntos clave (1, 2, 3, 4) del ciclo termodinámico.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Variables Globales ---
+        let engineType = 'otto'; // 'otto' o 'diesel'
+        let r, Tmax;
+        let paso = 0; 
+        let simulationInterval = null;
+        const GAMMA = 1.4; 
+        const T_amb = 300; 
+
+        // Objetos P-V
+        let points = {};
+
+        // DOM Elements
+        const canvas = document.getElementById('pvDiagram');
+        const ctx = canvas.getContext('2d');
+        const piston = document.getElementById('piston');
+        const gasVolume = document.getElementById('gasVolume');
+        const sparkFlash = document.getElementById('sparkFlash');
+        const sparkPlug = document.getElementById('sparkPlug');
+        const valveIntake = document.getElementById('valveIntake');
+        const valveExhaust = document.getElementById('valveExhaust');
+        
+        const strokeName = document.getElementById('strokeName');
+        const thermoDesc = document.getElementById('thermoDesc');
+        const statusContainer = document.getElementById('statusContainer');
+        const tempDisplay = document.getElementById('tempDisplay');
+        const engineWrapper = document.getElementById('engineWrapper');
+        
+        const compSlider = document.getElementById('compressionRatio');
+        const compVal = document.getElementById('compVal');
+        
+        // --- LÓGICA DE MOTORES ---
+
+        function setEngine(type) {
+            engineType = type;
+            
+            // Actualizar UI Botones
+            const btnOtto = document.getElementById('btnOtto');
+            const btnDiesel = document.getElementById('btnDiesel');
+            const desc = document.getElementById('engineDesc');
+            
+            if (type === 'otto') {
+                btnOtto.className = "flex-1 py-2 px-3 rounded text-sm font-bold transition bg-red-600 text-white shadow-md";
+                btnDiesel.className = "flex-1 py-2 px-3 rounded text-sm font-bold transition bg-gray-200 text-gray-700 hover:bg-gray-300";
+                desc.textContent = "Encendido por chispa (Bujía). Combustión Isócora (Volumen Constante).";
+                sparkPlug.style.display = 'block';
+                // Rango Otto típico
+                compSlider.min = 6; compSlider.max = 14; 
+                if(parseFloat(compSlider.value) > 14) compSlider.value = 10;
+                engineWrapper.classList.remove('engine-diesel');
+            } else {
+                btnDiesel.className = "flex-1 py-2 px-3 rounded text-sm font-bold transition bg-blue-700 text-white shadow-md";
+                btnOtto.className = "flex-1 py-2 px-3 rounded text-sm font-bold transition bg-gray-200 text-gray-700 hover:bg-gray-300";
+                desc.textContent = "Encendido por compresión. Combustión Isóbara (Presión Constante).";
+                sparkPlug.style.display = 'none'; // Diesel usa inyector (simplificado ocultando bujía)
+                // Rango Diesel típico
+                compSlider.min = 12; compSlider.max = 24;
+                if(parseFloat(compSlider.value) < 12) compSlider.value = 18;
+                engineWrapper.classList.add('engine-diesel');
+            }
+            
+            compVal.textContent = compSlider.value;
+            reiniciarCiclo();
+        }
+
+        function calcularCiclo() {
+            r = parseFloat(compSlider.value);
+            Tmax = parseFloat(document.getElementById('tmax').value);
+            compVal.textContent = r;
+
+            const V1 = 15; // Escala visual
+            const V2 = V1 / r; 
+            const P1 = 1; 
+            const T1 = T_amb;
+
+            // 1->2 Compresión Adiabática (Igual para ambos)
+            const P2 = P1 * Math.pow(r, GAMMA);
+            const T2 = T1 * Math.pow(r, GAMMA - 1);
+
+            let P3, V3, T3, P4, V4, T4;
+            let eficiencia = 0;
+
+            if (engineType === 'otto') {
+                // OTTO: 2->3 Calentamiento Isócoro (Volumen Cte)
+                V3 = V2;
+                T3 = Tmax;
+                P3 = P2 * (T3 / T2); // Ley Gay-Lussac
+
+                // 3->4 Expansión Adiabática
+                V4 = V1;
+                T4 = T3 * Math.pow(V3 / V4, GAMMA - 1);
+                P4 = P3 * Math.pow(V3 / V4, GAMMA);
+
+                // Eficiencia Otto
+                eficiencia = 1 - (1 / Math.pow(r, GAMMA - 1));
+
+                points = {
+                    p1: { v: V1, p: P1 },
+                    p2: { v: V2, p: P2 },
+                    p3: { v: V3, p: P3 },
+                    p4: { v: V4, p: P4 },
+                    type: 'otto'
+                };
+
+            } else {
+                // DIESEL: 2->3 Calentamiento Isóbaro (Presión Cte)
+                P3 = P2;
+                T3 = Tmax;
+                V3 = V2 * (T3 / T2); // Ley Charles (Expansión durante inyección)
+                
+                // Relación de corte (Cut-off ratio)
+                const rc = V3 / V2;
+
+                // 3->4 Expansión Adiabática
+                V4 = V1;
+                // Relaciones adiabáticas complejas
+                T4 = T3 * Math.pow(V3 / V4, GAMMA - 1);
+                P4 = P3 * Math.pow(V3 / V4, GAMMA);
+
+                // Eficiencia Diesel
+                const term1 = 1 / Math.pow(r, GAMMA - 1);
+                const term2 = (Math.pow(rc, GAMMA) - 1) / (GAMMA * (rc - 1));
+                eficiencia = 1 - (term1 * term2);
+
+                points = {
+                    p1: { v: V1, p: P1 },
+                    p2: { v: V2, p: P2 },
+                    p3: { v: V3, p: P3 }, // Punto extra del corte de inyección
+                    p4: { v: V4, p: P4 },
+                    type: 'diesel'
+                };
+            }
+
+            document.getElementById('eficienciaDisplay').textContent = (eficiencia * 100).toFixed(1) + " %";
+            drawDiagram(0);
+        }
+
+        // --- GRÁFICOS P-V ---
+        function drawDiagram(step) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!points.p1) return;
+
+            // Escalas dinámicas
+            const maxP = (points.p3.p > points.p2.p ? points.p3.p : points.p2.p) * 1.1;
+            const maxV = points.p1.v * 1.1;
+            
+            const toX = (v) => 40 + (v / maxV) * (canvas.width - 60);
+            const toY = (p) => canvas.height - (30 + (p / maxP) * (canvas.height - 50));
+
+            // Dibujar Ejes
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(40, canvas.height - 30); ctx.lineTo(canvas.width - 10, canvas.height - 30);
+            ctx.moveTo(40, canvas.height - 30); ctx.lineTo(40, 10);
+            ctx.stroke();
+
+            // Definir Curvas según tipo
+            let curves = [];
+            if (engineType === 'otto') {
+                curves = [
+                    { s: points.p1, e: points.p2, t: 'adiabatica', idx: 2 }, // Compresión
+                    { s: points.p2, e: points.p3, t: 'linea', idx: 3 },      // Explosión (V cte)
+                    { s: points.p3, e: points.p4, t: 'adiabatica', idx: 3 }, // Expansión (Power)
+                    { s: points.p4, e: points.p1, t: 'linea', idx: 4 }       // Escape
+                ];
+            } else {
+                curves = [
+                    { s: points.p1, e: points.p2, t: 'adiabatica', idx: 2 }, // Compresión
+                    { s: points.p2, e: points.p3, t: 'linea', idx: 3 },      // Inyección (P cte) -> Meseta
+                    { s: points.p3, e: points.p4, t: 'adiabatica', idx: 3 }, // Expansión
+                    { s: points.p4, e: points.p1, t: 'linea', idx: 4 }       // Escape
+                ];
+            }
+
+            // Dibujar Curvas
+            curves.forEach(c => {
+                ctx.beginPath();
+                ctx.moveTo(toX(c.s.v), toY(c.s.p));
+                
+                const isActive = (step === c.idx);
+                ctx.strokeStyle = isActive ? (engineType === 'otto' ? '#dc2626' : '#1d4ed8') : '#cbd5e1';
+                ctx.lineWidth = isActive ? 3 : 2;
+                
+                if (c.t === 'linea') {
+                    ctx.lineTo(toX(c.e.v), toY(c.e.p));
+                } else {
+                    const steps = 20;
+                    const K = c.s.p * Math.pow(c.s.v, GAMMA);
+                    for(let i=1; i<=steps; i++) {
+                        const t = i/steps;
+                        const v = c.s.v + (c.e.v - c.s.v) * t;
+                        const p = K / Math.pow(v, GAMMA);
+                        ctx.lineTo(toX(v), toY(p));
+                    }
+                }
+                ctx.stroke();
+            });
+
+            // Dibujar Puntos Clave y Etiquetas
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 12px Arial';
+            
+            Object.keys(points).forEach((k, index) => {
+                if(k.startsWith('p')) {
+                    const pt = points[k];
+                    const x = toX(pt.v);
+                    const y = toY(pt.p);
+                    
+                    // Dibujar el punto
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI*2);
+                    ctx.fillStyle = '#4b5563'; // Gris oscuro base
+                    ctx.fill();
+
+                    // Etiqueta numérica
+                    const num = index + 1; // p1 -> 1, p2 -> 2...
+                    // Ajustar posición de la etiqueta para que no tape la línea
+                    let offsetX = 0, offsetY = 0;
+                    if (num === 1) { offsetX = 10; offsetY = 10; }
+                    if (num === 2) { offsetX = -10; offsetY = -10; }
+                    if (num === 3) { offsetX = 10; offsetY = -10; } // Diesel p3 a la derecha
+                    if (engineType === 'otto' && num === 3) { offsetX = 0; offsetY = -15; }
+                    if (num === 4) { offsetX = 10; offsetY = 0; }
+
+                    ctx.fillStyle = '#000';
+                    ctx.fillText(num, x + offsetX, y + offsetY);
+                }
+            });
+
+            // --- MARCADOR DE ESTADO ACTUAL (Punto que se mueve/resalta) ---
+            if (step > 0) {
+                let targetPt;
+                // Mapear el paso actual al punto objetivo en el gráfico
+                // Paso 1 (Admisión) -> Termina en P1 (Inicio ciclo)
+                // Paso 2 (Compresión) -> Termina en P2
+                // Paso 3 (Expansión) -> Termina en P4 (Pasando por P3)
+                // Paso 4 (Escape) -> Termina en P1 (Cierre ciclo)
+                
+                if (step === 1) targetPt = points.p1;
+                else if (step === 2) targetPt = points.p2;
+                else if (step === 3) targetPt = points.p4; // Final de expansión
+                else if (step === 4) targetPt = points.p1;
+
+                if (targetPt) {
+                    const tx = toX(targetPt.v);
+                    const ty = toY(targetPt.p);
+                    
+                    // Halo brillante
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, 8, 0, Math.PI*2);
+                    ctx.fillStyle = engineType === 'otto' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(37, 99, 235, 0.4)';
+                    ctx.fill();
+                    
+                    // Punto central
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, 5, 0, Math.PI*2);
+                    ctx.fillStyle = engineType === 'otto' ? '#b91c1c' : '#1e40af';
+                    ctx.fill();
+                }
+            }
+        }
+
+        // --- SIMULACIÓN Y ANIMACIÓN ---
+
+        function setPistonPos(percent) {
+            // 0 = TDC (Arriba), 1 = BDC (Abajo)
+            const minTop = 20;
+            const maxTop = 220;
+            const currentTop = minTop + (maxTop - minTop) * percent;
+            piston.style.top = currentTop + 'px';
+            gasVolume.style.height = currentTop + 'px';
+        }
+
+        function ejecutarTiempos(p) {
+            // Reset visuales rápidos
+            sparkFlash.classList.remove('active');
+            valveIntake.classList.remove('open');
+            valveExhaust.classList.remove('open');
+            gasVolume.className = 'gas-volume'; // Quitar colores
+            
+            const isDiesel = (engineType === 'diesel');
+            
+            // Textos y Colores
+            let titulo = "";
+            let desc = "";
+            let colorClass = "";
+            let tempShow = T_amb;
+
+            switch(p) {
+                case 1: // ADMISIÓN
+                    titulo = "1. ADMISIÓN ISÓBARA (0 → 1)";
+                    desc = isDiesel 
+                        ? "Entrada de AIRE puro. (Nos situamos en el Punto 1 del gráfico)." 
+                        : "Entrada de AIRE/GASOLINA. (Nos situamos en el Punto 1 del gráfico).";
+                    colorClass = "border-blue-400 bg-blue-50 text-blue-900";
+                    
+                    valveIntake.classList.add('open');
+                    setPistonPos(1); // Baja
+                    gasVolume.classList.add(isDiesel ? 'gas-intake-diesel' : 'gas-intake-otto');
+                    tempShow = T_amb;
+                    break;
+                
+                case 2: // COMPRESIÓN
+                    titulo = "2. COMPRESIÓN ADIABÁTICA (1 → 2)";
+                    desc = "El pistón sube comprimiendo la mezcla. Vamos del Punto 1 al 2.";
+                    colorClass = "border-indigo-400 bg-indigo-50 text-indigo-900";
+                    
+                    setPistonPos(0); // Sube
+                    gasVolume.classList.add('gas-compression');
+                    tempShow = Math.round(T_amb * Math.pow(r, GAMMA-1)); // T2
+                    break;
+
+                case 3: // EXPANSIÓN (POWER)
+                    if (isDiesel) {
+                        titulo = "3. INYECCIÓN + EXPANSIÓN (2 → 3 → 4)";
+                        desc = "Inyección a Presión Constante (2-3) y Expansión Adiabática (3-4).";
+                        colorClass = "border-orange-400 bg-orange-50 text-orange-900";
+                    } else {
+                        titulo = "3. EXPLOSIÓN + EXPANSIÓN (2 → 3 → 4)";
+                        desc = "Explosión a Volumen Constante (2-3) y Expansión Adiabática (3-4).";
+                        colorClass = "border-red-400 bg-red-50 text-red-900";
+                        
+                        // Chispa visual Otto
+                        setTimeout(() => sparkFlash.classList.add('active'), 50);
+                        setTimeout(() => sparkFlash.classList.remove('active'), 300);
+                    }
+                    
+                    setPistonPos(1); // Baja con fuerza
+                    gasVolume.classList.add('gas-explosion');
+                    tempShow = Tmax; // Aprox T3
+                    break;
+
+                case 4: // ESCAPE
+                    titulo = "4. ESCAPE (4 → 1)";
+                    desc = "Enfriamiento Isócoro (caída de presión 4-1) y expulsión de gases.";
+                    colorClass = "border-gray-400 bg-gray-100 text-gray-800";
+                    
+                    valveExhaust.classList.add('open');
+                    setPistonPos(0); // Sube
+                    gasVolume.classList.add('gas-exhaust');
+                    tempShow = Math.round(Tmax / Math.pow(r, 0.4)); // Aprox T4
+                    break;
+            }
+
+            strokeName.textContent = titulo;
+            thermoDesc.textContent = desc;
+            statusContainer.className = `w-full mt-4 p-3 rounded border-l-4 shadow-sm transition-all duration-300 ${colorClass}`;
+            tempDisplay.textContent = tempShow;
+            drawDiagram(p);
+        }
+
+        function loop() {
+            paso = (paso % 4) + 1;
+            ejecutarTiempos(paso);
+        }
+
+        // --- CONTROLES ---
+        function iniciarSimulacion() {
+            if (simulationInterval) return;
+            calcularCiclo(); // Asegurar datos frescos
+            loop(); // Inmediato
+            simulationInterval = setInterval(loop, 2500); // 2.5s por ciclo para leer bien
+            document.getElementById('startButton').classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        function pausarSimulacion() {
+            clearInterval(simulationInterval);
+            simulationInterval = null;
+            document.getElementById('startButton').classList.remove('opacity-50', 'cursor-not-allowed');
+            strokeName.textContent += " (PAUSADO)";
+        }
+
+        function reiniciarCiclo() {
+            pausarSimulacion();
+            paso = 0;
+            calcularCiclo();
+            
+            // Reset visual completo
+            setPistonPos(0.1); // Casi arriba
+            valveIntake.classList.remove('open');
+            valveExhaust.classList.remove('open');
+            sparkFlash.classList.remove('active');
+            gasVolume.className = 'gas-volume';
+            
+            strokeName.textContent = "CICLO REINICIADO";
+            thermoDesc.textContent = "Listo para comenzar desde Fase 1.";
+            statusContainer.className = "w-full mt-4 p-3 bg-white rounded border-l-4 border-gray-400 shadow-sm";
+            tempDisplay.textContent = T_amb;
+            drawDiagram(0);
+        }
+
+        // Event Listeners
+        document.getElementById('startButton').addEventListener('click', iniciarSimulacion);
+        document.getElementById('pauseButton').addEventListener('click', pausarSimulacion);
+        document.getElementById('resetButton').addEventListener('click', reiniciarCiclo);
+
+        ['compressionRatio', 'tmax'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                calcularCiclo();
+                // Si cambian parámetros críticos, reiniciamos suavemente si está parado
+                if (!simulationInterval) reiniciarCiclo();
+            });
+        });
+
+        // Inicialización
+        window.onload = () => {
+            setEngine('otto'); // Default
+        };
+
+    </script>
+</body>
+</html>

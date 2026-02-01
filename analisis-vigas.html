@@ -1,4 +1,4 @@
-<!--
+
 ================================================================================
 Apps Tecnología Industrial - 2º Bachillerato
 Copyright © 2025 José Manuel Vega. Todos los derechos reservados.
@@ -9,6 +9,1138 @@ Prohibida su copia, modificación o redistribución sin permiso expreso.
 Contacto: josmavega@gmail.com
 Instagram: @_tecnologiaymas
 ================================================================================
--->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Vigas (Flexible)</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para el canvas */
+        canvas {
+            border: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            width: 100%;
+            height: 250px; /* Altura fija para los diagramas */
+            margin-bottom: 1rem;
+        }
+        
+        /* Estilo para mostrar las ecuaciones de forma preformateada */
+        #calculationText { /* Ahora apunta directamente al PRE */
+            white-space: pre-wrap;
+            font-family: monospace;
+            padding: 1.5rem;
+            background-color: #f0f9ff; /* Blue Light */
+            border: 1px solid #bae6fd; /* Blue Lighter */
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            color: #1f2937; /* Dark Gray for text */
+            font-size: 14px;
+        }
+        #calculationText strong {
+            color: #1e40af; /* Darker Blue for emphasis */
+            font-size: 16px;
+        }
+        /* Estilos para simular líneas de separación en la salida PRE */
+        #calculationText hr {
+            border-top: 1px solid #93c5fd;
+            margin: 0.5rem 0;
+        }
+    </style>
+    <script>
+        // Configuración de Tailwind para usar la fuente Inter
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans p-4 sm:p-8">
 
-<!-- Aquí irá tu código HTML del Análisis de Vigas -->
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl p-6 md:p-10">
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-indigo-700">Calculadora de Diagramas de Vigas Flexibles</h1>
+            <p class="mt-2 text-gray-600">Representación simplificada de Esfuerzos Cortantes (V) y Momentos Flectores (M) con geometría adaptable.</p>
+        </header>
+
+        <!-- Controles de Configuración -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Longitud de la Viga (L) -->
+            <div class="col-span-1">
+                <label for="length" class="block text-sm font-medium text-gray-700">Longitud de la viga L (m)</label>
+                <input type="number" id="length" value="6.0" min="1" step="0.5"
+                       class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-indigo-500 focus:ring-indigo-500"
+                       onchange="updateLoadInputs(); calculateAndDraw()">
+            </div>
+
+            <!-- Tipo de Viga -->
+            <div class="col-span-1">
+                <label for="beamType" class="block text-sm font-medium text-gray-700">Tipo de Viga</label>
+                <select id="beamType"
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border bg-white focus:border-indigo-500 focus:ring-indigo-500"
+                        onchange="updateLoadInputs(); calculateAndDraw()">
+                    <option value="simplySupported">Simplemente Apoyada</option>
+                    <option value="cantilever">En Voladizo (Cantilever)</option>
+                </select>
+            </div>
+            
+            <!-- Cantilever Fixation Side -->
+            <div id="cantileverFixationContainer" class="col-span-1 hidden">
+                <label for="fixationSide" class="block text-sm font-medium text-gray-700">Lado del Empotramiento</label>
+                <select id="fixationSide"
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border bg-white focus:border-indigo-500 focus:ring-indigo-500"
+                        onchange="calculateAndDraw()">
+                    <option value="left">Izquierda (x=0)</option>
+                    <option value="right">Derecha (x=L)</option>
+                </select>
+            </div>
+
+            <!-- Simply Supported Support Positions -->
+            <div id="ssSupportContainer" class="col-span-2 grid grid-cols-2 gap-4 hidden">
+                <div>
+                    <label for="supportA" class="block text-sm font-medium text-gray-700">Posición Apoyo Fijo A (m)</label>
+                    <input type="number" id="supportA" value="0.0" min="0.0" step="0.5"
+                           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-indigo-500 focus:ring-indigo-500"
+                           onchange="updateLoadInputs(); calculateAndDraw()">
+                </div>
+                <div>
+                    <label for="supportB" class="block text-sm font-medium text-gray-700">Posición Apoyo Móvil B (m)</label>
+                    <input type="number" id="supportB" value="6.0" min="0.0" step="0.5"
+                           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-indigo-500 focus:ring-indigo-500"
+                           onchange="updateLoadInputs(); calculateAndDraw()">
+                </div>
+            </div>
+
+            <!-- Tipo de Carga -->
+            <div class="col-span-1">
+                <label for="loadType" class="block text-sm font-medium text-gray-700">Tipo de Carga</label>
+                <select id="loadType"
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border bg-white focus:border-indigo-500 focus:ring-indigo-500"
+                        onchange="updateLoadInputs(); calculateAndDraw()">
+                    <option value="point">Carga Puntual (P)</option>
+                    <option value="udl">Carga Uniformemente Distribuida (q)</option>
+                </select>
+            </div>
+
+            <!-- Magnitud de Carga (P o q) -->
+            <div class="col-span-1">
+                <label for="loadMagnitude" class="block text-sm font-medium text-gray-700" id="loadMagnitudeLabel">Magnitud de la Carga P (kN)</label>
+                <input type="number" id="loadMagnitude" value="10.0" min="0.1" step="0.5"
+                       class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-indigo-500 focus:ring-indigo-500"
+                       onchange="calculateAndDraw()">
+            </div>
+
+            <!-- Posición de Carga 'a' (solo para Carga Puntual) -->
+            <div id="loadPositionContainer" class="col-span-1">
+                <label for="loadPosition" class="block text-sm font-medium text-gray-700">Posición de la carga a (m)</label>
+                <input type="number" id="loadPosition" value="3.0" min="0" step="0.5"
+                       class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-indigo-500 focus:ring-indigo-500"
+                       onchange="updateLoadInputs(); calculateAndDraw()">
+            </div>
+
+            <!-- UDL start and end (a1 and a2) -->
+            <div id="udlPositionContainer" class="col-span-2 grid grid-cols-2 gap-4 hidden">
+                <div>
+                    <label for="udlStart" class="block text-sm font-medium text-gray-700">Inicio de Carga a₁ (m)</label>
+                    <input type="number" id="udlStart" value="1.0" min="0.0" step="0.5"
+                           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-indigo-500 focus:ring-indigo-500"
+                           onchange="updateLoadInputs(); calculateAndDraw()">
+                </div>
+                <div>
+                    <label for="udlEnd" class="block text-sm font-medium text-gray-700">Fin de Carga a₂ (m)</label>
+                    <input type="number" id="udlEnd" value="5.0" min="0.0" step="0.5"
+                           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-indigo-500 focus:ring-indigo-500"
+                           onchange="updateLoadInputs(); calculateAndDraw()">
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4 border-t pt-4">Resultados y Pasos de Cálculo</h2>
+        
+        <p class="mb-4 text-sm text-gray-500 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+            *Nota sobre M: Se utiliza el **Convenio del Signo** (positivo arriba, negativo abajo).
+        </p>
+
+        <!-- Reacciones Calculadas -->
+        <div id="results" class="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+            <h3 class="text-lg font-semibold text-indigo-700 mb-2">Resumen de Reacciones</h3>
+            <p id="reactionA" class="text-gray-700">R_A / R_x (Reacción Vertical) = </p>
+            <p id="reactionB" class="text-gray-700 hidden">R_B (Reacción Vertical) = </p>
+            <p id="momentA" class="text-gray-700 hidden">M_A / M_x (Momento de Empotramiento) = </p>
+        </div>
+
+        <!-- Sección de Pasos de Cálculo DESPLEGABLE (DETAILS/SUMMARY) -->
+        <details id="calculationSteps" class="mb-8 border border-gray-200 rounded-xl" open>
+            <summary class="cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 rounded-t-xl text-xl font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                1. Pasos de Cálculo Explicativos y Funciones de Esfuerzos
+            </summary>
+            <div class="p-4 pt-0">
+                <pre id="calculationText" class="mt-4">Cálculos se mostrarán aquí...</pre>
+            </div>
+        </details>
+
+        <!-- Canvas para el Dibujo de Diagramas -->
+        <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-gray-800">2. Viga y Carga</h3>
+            <canvas id="beamCanvas"></canvas>
+
+            <h3 class="text-xl font-semibold text-gray-800">3. Diagrama de Esfuerzo Cortante (V)</h3>
+            <canvas id="shearCanvas"></canvas>
+
+            <h3 class="text-xl font-semibold text-gray-800">4. Diagrama de Momento Flector (M)</h3>
+            <canvas id="momentCanvas"></canvas>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        // Variables globales para los elementos del canvas y contexto
+        let beamCanvas, shearCanvas, momentCanvas;
+        let ctxBeam, ctxShear, ctxMoment;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar elementos de canvas y contextos
+            beamCanvas = document.getElementById('beamCanvas');
+            shearCanvas = document.getElementById('shearCanvas');
+            momentCanvas = document.getElementById('momentCanvas');
+            
+            // Ajustar el tamaño del canvas para mejor dibujo (aunque CSS lo escala visualmente)
+            const parentWidth = beamCanvas.parentElement.offsetWidth;
+            const canvasHeight = 250; // Altura fija para los diagramas
+            
+            [beamCanvas, shearCanvas, momentCanvas].forEach(canvas => {
+                canvas.width = parentWidth;
+                canvas.height = canvasHeight;
+            });
+
+            ctxBeam = beamCanvas.getContext('2d');
+            ctxShear = shearCanvas.getContext('2d');
+            ctxMoment = momentCanvas.getContext('2d');
+
+            // Ejecutar el cálculo y el dibujo inicial
+            updateLoadInputs();
+            calculateAndDraw();
+            
+            // Escuchar cambios de tamaño de ventana para ajustar el canvas
+            window.addEventListener('resize', () => {
+                const newParentWidth = beamCanvas.parentElement.offsetWidth;
+                [beamCanvas, shearCanvas, momentCanvas].forEach(canvas => {
+                    canvas.width = newParentWidth;
+                });
+                calculateAndDraw();
+            });
+        });
+
+        // ==========================================================
+        // FUNCIONES DE INTERFAZ Y VALIDACIÓN
+        // ==========================================================
+
+        /**
+         * Actualiza la visibilidad y etiquetas de los campos de entrada
+         * según el tipo de viga y carga seleccionado, y valida sus límites.
+         */
+        function updateLoadInputs() {
+            const beamType = document.getElementById('beamType').value;
+            const loadType = document.getElementById('loadType').value;
+            const lengthInput = document.getElementById('length');
+            const L = parseFloat(lengthInput.value);
+
+            // Inputs generales
+            const loadMagnitudeLabel = document.getElementById('loadMagnitudeLabel');
+            const loadPositionInput = document.getElementById('loadPosition');
+            const udlStartInput = document.getElementById('udlStart');
+            const udlEndInput = document.getElementById('udlEnd');
+            const supportAInput = document.getElementById('supportA');
+            const supportBInput = document.getElementById('supportB');
+
+
+            // 1. Ocultar todos los contenedores especializados
+            document.getElementById('cantileverFixationContainer').classList.add('hidden');
+            document.getElementById('ssSupportContainer').classList.add('hidden');
+            document.getElementById('loadPositionContainer').classList.add('hidden'); // Point load 'a'
+            document.getElementById('udlPositionContainer').classList.add('hidden'); // UDL 'a1', 'a2'
+            
+            // Set max length for all length-based inputs
+            [loadPositionInput, udlStartInput, udlEndInput, supportAInput, supportBInput].forEach(input => {
+                 input.max = L;
+                 if (parseFloat(input.value) > L) input.value = L;
+            });
+            
+            // 2. Mostrar inputs por Tipo de Viga
+            if (beamType === 'simplySupported') {
+                document.getElementById('ssSupportContainer').classList.remove('hidden');
+                
+                // Asegurar que xA < xB
+                if (parseFloat(supportAInput.value) >= parseFloat(supportBInput.value)) {
+                    // Si están invertidos o son iguales, restaurar valores razonables
+                    supportAInput.value = 0.0;
+                    supportBInput.value = L;
+                }
+
+            } else { // cantilever
+                document.getElementById('cantileverFixationContainer').classList.remove('hidden');
+            }
+
+            // 3. Mostrar inputs por Tipo de Carga
+            if (loadType === 'point') {
+                loadMagnitudeLabel.textContent = 'Magnitud de la Carga P (kN)';
+                document.getElementById('loadPositionContainer').classList.remove('hidden');
+
+            } else { // udl
+                loadMagnitudeLabel.textContent = 'Magnitud de la Carga Distribuida q (kN/m)';
+                document.getElementById('udlPositionContainer').classList.remove('hidden');
+                
+                // Asegurar que a1 < a2
+                if (parseFloat(udlStartInput.value) > parseFloat(udlEndInput.value)) {
+                    const temp = udlStartInput.value;
+                    udlStartInput.value = udlEndInput.value;
+                    udlEndInput.value = temp;
+                }
+            }
+        }
+
+        // ==========================================================
+        // FUNCIONES DE CÁLCULO Y GENERACIÓN DE TEXTO
+        // ==========================================================
+
+        /**
+         * Realiza el cálculo de reacciones, V(x) y M(x) para el caso seleccionado
+         * y genera el texto explicativo de los pasos.
+         */
+        function calculateBeamData() {
+            const L = parseFloat(document.getElementById('length').value);
+            const beamType = document.getElementById('beamType').value;
+            const loadType = document.getElementById('loadType').value;
+            const W = parseFloat(document.getElementById('loadMagnitude').value); // W = P o q
+            
+            // Load Position inputs
+            const a = parseFloat(document.getElementById('loadPosition').value); // Point Load position
+            const a1 = parseFloat(document.getElementById('udlStart').value); // UDL start
+            const a2 = parseFloat(document.getElementById('udlEnd').value); // UDL end
+
+            // Support/Fixation inputs
+            const xA = parseFloat(document.getElementById('supportA').value); // SS Support A position
+            const xB = parseFloat(document.getElementById('supportB').value); // SS Support B position
+            const fixationSide = document.getElementById('fixationSide').value; // Cantilever side
+
+            // Validaciones
+            if (L <= 0 || W <= 0) return { V: () => 0, M: () => 0, reactions: {}, supportPos: {}, calculationText: "Error: Valores de longitud o carga deben ser positivos." };
+            if (loadType === 'point' && (a < 0 || a > L)) return { V: () => 0, M: () => 0, reactions: {}, supportPos: {}, calculationText: "Error: La posición 'a' debe estar entre 0 y L." };
+            if (loadType === 'udl' && (a1 >= a2 || a1 < 0 || a2 > L)) return { V: () => 0, M: () => 0, reactions: {}, supportPos: {}, calculationText: "Error: La carga distribuida debe estar contenida en la viga y a₁ < a₂." };
+            if (beamType === 'simplySupported' && (xA >= xB || xA < 0 || xB > L)) return { V: () => 0, M: () => 0, reactions: {}, supportPos: {}, calculationText: "Error: En SS, xA debe ser menor que xB, y ambos entre 0 y L." };
+
+
+            const data = { reactions: {}, V: (x) => 0, M: (x) => 0, supportPos: {}, calculationText: "" };
+            let calc = "";
+
+            // ==========================================================
+            // CÁLCULO DE VIGA SIMPLEMENTE APOYADA (movable supports)
+            // ==========================================================
+            if (beamType === 'simplySupported') {
+                document.getElementById('reactionB').classList.remove('hidden');
+                document.getElementById('momentA').classList.add('hidden');
+                data.supportPos = { xA: xA, xB: xB };
+                const L_span = xB - xA; // Distancia entre apoyos
+                
+                if (L_span <= 0) return { V: () => 0, M: () => 0, reactions: {}, supportPos: {}, calculationText: "Error: Distancia entre apoyos debe ser positiva." };
+                
+                let Ra = 0, Rb = 0;
+
+                calc += "Tipo de Viga: Simplemente Apoyada (SS)\n";
+                calc += `Longitud Total (L): ${L.toFixed(1)} m\n`;
+                calc += `Apoyos: A en x=${xA.toFixed(1)} m, B en x=${xB.toFixed(1)} m\n`;
+                calc += `Luz de Apoyo: L_{AB} = ${L_span.toFixed(1)} m\n\n`;
+
+                calc += "================================================\n";
+                calc += "         1. CÁLCULO DE REACCIONES (R_A y R_B)         \n";
+                calc += "================================================\n\n";
+                
+                if (loadType === 'point') {
+                    // Carga P=W en x=a.
+                    const P = W;
+                    const d_PA = a - xA; // Distancia de P a A
+                    const d_PB = xB - a; // Distancia de P a B
+                    const P_in_span = a >= xA && a <= xB;
+
+                    calc += `Carga Puntual P = ${P.toFixed(2)} kN en x = ${a.toFixed(1)} m\n`;
+                    calc += `Brazos de palanca: d_{PA} = ${d_PA.toFixed(1)} m | d_{PB} = ${d_PB.toFixed(1)} m\n\n`;
+                    
+                    if (P_in_span) {
+                        Ra = P * d_PB / L_span;
+                        Rb = P * d_PA / L_span;
+
+                        calc += "-> Ecuaciones de Equilibrio:\n";
+                        calc += "   1. Suma de Fuerzas Verticales: ΣF_y = 0  =>  R_A + R_B = P\n";
+                        calc += "   2. Suma de Momentos en A: ΣM_A = 0  =>  (R_B * L_{AB}) - (P * d_{PA}) = 0\n\n";
+                        
+                        calc += "-> Cálculo de R_B (Usando ΣM_A = 0):\n";
+                        calc += `   R_B = (P * d_{PA}) / L_{AB}\n`;
+                        calc += `   R_B = (${P.toFixed(2)} * ${d_PA.toFixed(2)}) / ${L_span.toFixed(2)} = ${Rb.toFixed(2)} kN\n\n`;
+
+                        calc += "-> Cálculo de R_A (Usando ΣF_y = 0):\n";
+                        calc += `   R_A = P - R_B\n`;
+                        calc += `   R_A = ${P.toFixed(2)} - ${Rb.toFixed(2)} = ${Ra.toFixed(2)} kN\n\n`;
+                    } else {
+                        calc += "La carga está fuera del vano de apoyo. R_A = R_B = 0.\n\n";
+                    }
+
+                    data.reactions = { Ra: Ra, Rb: Rb };
+                    
+                    data.V = (x) => {
+                        let V = 0;
+                        if (x >= xA) V += Ra; 
+                        if (x >= a) V -= W; 
+                        if (x >= xB) V -= Rb; 
+                        return V; 
+                    };
+                    
+                    data.M = (x) => {
+                        let M = 0;
+                        if (x >= xA) M += Ra * (x - xA);
+                        if (x >= a) M -= W * (x - a);
+                        return M;
+                    };
+
+                    if (P_in_span) {
+                        calc += "================================================\n";
+                        calc += "        2. FUNCIONES DE ESFUERZOS INTERNOS (x)        \n";
+                        calc += "================================================\n\n";
+                        
+                        calc += "V(x) = Esfuerzo Cortante (kN)\n";
+                        calc += "M(x) = Momento Flector (kNm)\n\n";
+                        
+                        calc += "TRAMO I: xA < x < a\n";
+                        calc += `   V(x) = + R_A = + ${Ra.toFixed(2)} \t\t(Constante)\n`;
+                        calc += `   M(x) = R_A * (x - xA) = ${Ra.toFixed(2)} * (x - ${xA.toFixed(1)})\n\n`;
+
+                        calc += "TRAMO II: a < x < xB\n";
+                        calc += `   V(x) = + R_A - P = ${Ra.toFixed(2)} - ${P.toFixed(2)} = ${(Ra - P).toFixed(2)} \t(Constante)\n`;
+                        calc += `   M(x) = R_A * (x - xA) - P * (x - a)\n`;
+                        calc += `   (M_{max} = ${data.M(a).toFixed(2)} kNm en x=${a.toFixed(1)}m)\n`;
+                    }
+
+
+                } else { // loadType === 'udl'
+                    // Carga q=W de a1 a a2.
+                    const q = W;
+                    let overlapStart = Math.max(a1, xA);
+                    let overlapEnd = Math.min(a2, xB);
+                    let L_overlap = Math.max(0, overlapEnd - overlapStart);
+                    
+                    calc += `Carga Distribuida (q): ${q.toFixed(2)} kN/m de a₁=${a1.toFixed(1)} m a a₂=${a2.toFixed(1)} m\n`;
+                    
+                    if (L_overlap > 0) {
+                        const W_overlap = q * L_overlap;
+                        const x_c_overlap = (overlapStart + overlapEnd) / 2;
+                        const d_cA = x_c_overlap - xA;
+                        const d_cB = xB - x_c_overlap;
+
+                        // Momento de W_overlap respecto a A
+                        const M_A_udl = W_overlap * d_cA;
+                        Rb = M_A_udl / L_span;
+                        Ra = W_overlap - Rb;
+
+                        calc += `-> Carga Equivalente (P_eq) sobre el vano: P_eq = q * L_{overlap} = ${W_overlap.toFixed(2)} kN\n`;
+                        calc += `   Ubicación de P_eq: x_{c} = ${x_c_overlap.toFixed(2)} m (Brazo d_{cA} = ${d_cA.toFixed(2)} m)\n\n`;
+                        
+                        calc += "-> Ecuaciones de Equilibrio:\n";
+                        calc += "   1. Suma de Fuerzas Verticales: ΣF_y = 0  =>  R_A + R_B = P_{eq}\n";
+                        calc += "   2. Suma de Momentos en A: ΣM_A = 0  =>  (R_B * L_{AB}) - (P_{eq} * d_{cA}) = 0\n\n";
+
+                        calc += "-> Cálculo de R_B (Usando ΣM_A = 0):\n";
+                        calc += `   R_B = (P_{eq} * d_{cA}) / L_{AB}\n`;
+                        calc += `   R_B = (${W_overlap.toFixed(2)} * ${d_cA.toFixed(2)}) / ${L_span.toFixed(2)} = ${Rb.toFixed(2)} kN\n\n`;
+                        
+                        calc += "-> Cálculo de R_A (Usando ΣF_y = 0):\n";
+                        calc += `   R_A = P_{eq} - R_B\n`;
+                        calc += `   R_A = ${W_overlap.toFixed(2)} - ${Rb.toFixed(2)} = ${Ra.toFixed(2)} kN\n\n`;
+
+                    } else {
+                        calc += "La carga está fuera del vano de apoyo. R_A = R_B = 0.\n\n";
+                    }
+
+                    data.reactions = { Ra: Ra, Rb: Rb };
+
+                    data.V = (x) => {
+                        let V = 0;
+                        if (x >= xA) V += Ra;
+                        
+                        let q_start = Math.max(a1, 0);
+                        let q_end = Math.min(x, a2);
+                        
+                        if (q_end > q_start) {
+                            V -= q * (q_end - q_start);
+                        }
+                        return V;
+                    };
+                    
+                    data.M = (x) => {
+                        let M = 0;
+                        if (x >= xA) M += Ra * (x - xA);
+
+                        let q_start = Math.max(a1, 0);
+                        let q_end = Math.min(x, a2);
+                        
+                        if (q_end > q_start) {
+                            const L_active = q_end - q_start;
+                            const x_cg = q_start + L_active / 2;
+                            const moment_arm = x - x_cg;
+                            const force = q * L_active;
+                            M -= force * moment_arm;
+                        }
+
+                        return M;
+                    };
+                    
+                    if (L_overlap > 0) {
+                        calc += "================================================\n";
+                        calc += "        2. FUNCIONES DE ESFUERZOS INTERNOS (x)        \n";
+                        calc += "================================================\n\n";
+                        
+                        calc += "V(x) = Esfuerzo Cortante (kN)\n";
+                        calc += "M(x) = Momento Flector (kNm)\n\n";
+                        
+                        calc += `TRAMO CARGADO (de x=${overlapStart.toFixed(1)} a x=${overlapEnd.toFixed(1)}):\n`;
+                        calc += `   V(x) = + R_A - q * (x - a₁)\n`;
+                        calc += `   M(x) = R_A * (x - xA) - q * (x - a₁)² / 2\n`;
+                    }
+                }
+
+            } 
+            // ==========================================================
+            // CÁLCULO DE VIGA EN VOLADIZO (Cantilever)
+            // ==========================================================
+            else { 
+                document.getElementById('reactionB').classList.add('hidden');
+                document.getElementById('momentA').classList.remove('hidden');
+                data.supportPos = { fixationSide: fixationSide };
+
+                let Rx = 0, Mx = 0; 
+                const is_left_fix = fixationSide === 'left';
+                const fix_pos = is_left_fix ? 0 : L;
+                
+                calc += "Tipo de Viga: En Voladizo (Cantilever)\n";
+                calc += `Longitud Total (L): ${L.toFixed(1)} m\n`;
+                calc += `Empotramiento en: x = ${fix_pos.toFixed(1)} m\n\n`;
+                
+                calc += "================================================\n";
+                calc += "      1. CÁLCULO DE REACCIONES (R_x y M_x)      \n";
+                calc += "================================================\n\n";
+                
+                let W_total = 0;
+                let x_c = 0; // Centro de gravedad de la carga
+                
+                if (loadType === 'point') {
+                    const P = W;
+                    W_total = P;
+                    x_c = a;
+                    const d_Pc = Math.abs(fix_pos - x_c); // Brazo de palanca al empotramiento
+                    
+                    calc += `Carga Puntual P = ${P.toFixed(2)} kN en x = ${a.toFixed(1)} m\n`;
+                    calc += `Brazo de palanca: d_{Pc} = ${d_Pc.toFixed(2)} m\n\n`;
+
+                    Rx = P;
+                    Mx = P * d_Pc;
+                    
+                    data.reactions = { Ra: Rx, Ma: Mx };
+
+                    calc += "-> Ecuaciones de Equilibrio (R y M son las reacciones en el empotramiento):\n";
+                    calc += "   1. Suma de Fuerzas Verticales: ΣF_y = 0  =>  R = P\n";
+                    calc += "   2. Suma de Momentos en el Empotramiento: ΣM_{fix} = 0  =>  M_{fix} = P * d_{Pc}\n\n";
+
+                    calc += "-> Cálculo de Reacciones:\n";
+                    calc += `   R_x = P = ${Rx.toFixed(2)} kN\n`;
+                    calc += `   M_x = P * d_{Pc} = ${P.toFixed(2)} * ${d_Pc.toFixed(2)} = ${Mx.toFixed(2)} kNm\n\n`;
+
+                    
+                    calc += "================================================\n";
+                    calc += "        2. FUNCIONES DE ESFUERZOS INTERNOS (x)        \n";
+                    calc += "================================================\n\n";
+                    
+                    calc += "V(x) = Esfuerzo Cortante (kN)\n";
+                    calc += "M(x) = Momento Flector (kNm)\n\n";
+
+                    if (is_left_fix) { 
+                        // Fijo en x=0, Libre en x=L
+                        calc += `TRAMO I: 0 < x < a\n`;
+                        calc += `   V(x) = + R_x = + ${Rx.toFixed(2)} \t\t(Constante)\n`;
+                        calc += `   M(x) = - M_x + R_x * x = - ${Mx.toFixed(2)} + ${Rx.toFixed(2)} * x\n\n`;
+
+                        calc += `TRAMO II: a < x < L\n`;
+                        calc += `   V(x) = + R_x - P = ${Rx.toFixed(2)} - ${P.toFixed(2)} = 0 \t(Constante)\n`;
+                        calc += `   M(x) = - M_x + R_x * x - P * (x - a) \t\t (M(L) debe ser 0)\n`;
+
+                        data.V = (x) => {
+                            let V = 0;
+                            if (x >= 0) V += Rx; 
+                            if (x >= a) V -= W; 
+                            return V;
+                        };
+                        data.M = (x) => {
+                            let M = -Mx; // Momento de empotramiento es negativo
+                            M += Rx * x;
+                            if (x >= a) M -= W * (x - a);
+                            return M;
+                        };
+                    } else { 
+                        // Fijo en x=L, Libre en x=0
+                        calc += `TRAMO I: 0 < x < a\n`;
+                        calc += `   V(x) = 0 \t\t(Constante)\n`;
+                        calc += `   M(x) = 0\n\n`;
+
+                        calc += `TRAMO II: a < x < L\n`;
+                        calc += `   V(x) = - P = - ${P.toFixed(2)} \t\t(Constante)\n`;
+                        calc += `   M(x) = - P * (x - a)\t\t\t (M(L) debe ser 0)\n`;
+                        
+                        data.V = (x) => {
+                            let V = 0;
+                            if (x >= a) V -= W;
+                            if (x >= L) V += Rx; // Cierre de diagrama
+                            return V;
+                        };
+                        data.M = (x) => {
+                            let M = 0;
+                            if (x >= a) M -= W * (x - a); 
+                            if (x >= L) M += Mx; // Cierre de diagrama
+                            return M;
+                        };
+                    }
+
+                } else { // loadType === 'udl'
+                    const q = W;
+                    const L_udl = a2 - a1;
+                    W_total = q * L_udl;
+                    x_c = (a1 + a2) / 2;
+                    const d_Wc = Math.abs(fix_pos - x_c);
+                    
+                    calc += `Carga Distribuida (q): ${q.toFixed(2)} kN/m de a₁=${a1.toFixed(1)} m a a₂=${a2.toFixed(1)} m\n`;
+                    calc += `P_{eq} = ${W_total.toFixed(2)} kN en x = ${x_c.toFixed(2)} m\n`;
+                    calc += `Brazo de palanca: d_{Wc} = ${d_Wc.toFixed(2)} m\n\n`;
+
+                    Rx = W_total;
+                    Mx = W_total * d_Wc;
+
+                    data.reactions = { Ra: Rx, Ma: Mx };
+
+                    calc += "-> Cálculo de Reacciones:\n";
+                    calc += `   R_x = P_{eq} = ${Rx.toFixed(2)} kN\n`;
+                    calc += `   M_x = P_{eq} * d_{Wc} = ${Mx.toFixed(2)} kNm\n\n`;
+
+                    
+                    calc += "================================================\n";
+                    calc += "        2. FUNCIONES DE ESFUERZOS INTERNOS (x)        \n";
+                    calc += "================================================\n\n";
+                    
+                    calc += "V(x) = Esfuerzo Cortante (kN)\n";
+                    calc += "M(x) = Momento Flector (kNm)\n\n";
+
+                    if (is_left_fix) { 
+                        // Fijo en x=0, Libre en x=L
+                        calc += `TRAMO CARGADO (de x=${a1.toFixed(1)} a x=${a2.toFixed(1)}):\n`;
+                        calc += `   V(x) = + R_x - q * (x - a₁)\t\t (Función Lineal)\n`;
+                        calc += `   M(x) = - M_x + R_x * x - q * (x - a₁)² / 2\t (Función Cuadrática)\n`;
+                        
+                        data.V = (x) => {
+                            let V = Rx;
+                            let x_end = Math.min(x, a2);
+                            let q_start = Math.max(a1, 0);
+                            
+                            if (x_end > q_start) {
+                                V -= q * (x_end - q_start);
+                            }
+                            return V;
+                        };
+                        data.M = (x) => {
+                            let M = -Mx; // Momento de empotramiento es negativo
+                            M += Rx * x;
+
+                            let x_end = Math.min(x, a2);
+                            let q_start = Math.max(a1, 0);
+
+                            if (x_end > q_start) {
+                                const L_active = x_end - q_start;
+                                const x_cg = q_start + L_active / 2;
+                                M -= (q * L_active) * (x - x_cg);
+                            }
+                            return M;
+                        };
+                    } else { 
+                        // Fijo en x=L, Libre en x=0
+                        calc += `TRAMO CARGADO (de x=${a1.toFixed(1)} a x=${a2.toFixed(1)}):\n`;
+                        calc += `   V(x) = - q * (x - a₁) \t\t(Función Lineal)\n`;
+                        calc += `   M(x) = - q * (x - a₁)² / 2\t (Función Cuadrática)\n`;
+
+                        data.V = (x) => {
+                            let V = 0;
+                            let q_start = Math.max(a1, 0);
+                            let q_end = Math.min(x, a2);
+                            if (q_end > q_start) {
+                                V -= q * (q_end - q_start);
+                            }
+                            if (x >= L) V += Rx;
+                            return V;
+                        };
+                        data.M = (x) => {
+                            let M = 0;
+                            
+                            let q_start = Math.max(a1, 0);
+                            let q_end = Math.min(x, a2);
+                            if (q_end > q_start) {
+                                const L_active = q_end - q_start;
+                                const x_cg = q_start + L_active / 2;
+                                M -= (q * L_active) * (x - x_cg); 
+                            }
+                            
+                            if (x >= L) M += Mx;
+                            return M;
+                        };
+                    }
+                }
+            }
+            
+            // Actualizar el área de resultados
+            document.getElementById('reactionA').textContent = `R_A / R_x (Reacción Vertical) = ${data.reactions.Ra ? data.reactions.Ra.toFixed(2) : 'N/A'} kN`;
+            if (beamType === 'simplySupported') {
+                document.getElementById('reactionB').textContent = `R_B (Reacción Vertical en x=${xB.toFixed(1)}) = ${data.reactions.Rb.toFixed(2)} kN`;
+            } else {
+                document.getElementById('momentA').textContent = `M_A / M_x (Momento de Empotramiento) = ${data.reactions.Ma.toFixed(2)} kNm`;
+            }
+
+            data.calculationText = calc;
+            return data;
+        }
+
+        // ==========================================================
+        // FUNCIONES DE DIBUJO EN CANVAS
+        // ==========================================================
+        
+        const COLORS = {
+            BEAM: '#374151',
+            LOAD: '#EF4444',
+            SUPPORT: '#10B981',
+            DIAGRAM_LINE: '#3B82F6',
+            DIAGRAM_FILL_POS: '#93C5FD', // Azul claro para valores POSITIVOS (Arriba)
+            DIAGRAM_FILL_NEG: '#FCA5A5', // Rojo claro para valores NEGATIVOS (Abajo)
+            AXIS: '#9CA3AF'
+        };
+
+        /**
+         * Función principal para calcular los datos y dibujar los tres diagramas.
+         */
+        function calculateAndDraw() {
+            const data = calculateBeamData();
+            
+            // Update Calculation Text Area
+            document.getElementById('calculationText').textContent = data.calculationText;
+
+            if (data.calculationText.startsWith("Error")) {
+                // Clear canvases on error
+                [ctxBeam, ctxShear, ctxMoment].forEach(ctx => ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height));
+                return;
+            }
+
+            const L = parseFloat(document.getElementById('length').value);
+            const W = parseFloat(document.getElementById('loadMagnitude').value);
+            const beamType = document.getElementById('beamType').value;
+            const loadType = document.getElementById('loadType').value;
+            const a = parseFloat(document.getElementById('loadPosition').value);
+
+            // Determinar valores máximos para escalar los diagramas
+            const maxV = getMaxAbsValue(data.V, 0, L);
+            const maxM = getMaxAbsValue(data.M, 0, L);
+
+            drawBeamCanvas(L, beamType, loadType, W, a, data);
+            drawDiagram(shearCanvas, ctxShear, L, data.V, maxV, "V (kN)", true);
+            drawDiagram(momentCanvas, ctxMoment, L, data.M, maxM, "M (kNm)", false);
+        }
+
+        /**
+         * Obtiene el valor absoluto máximo de una función en un rango.
+         */
+        function getMaxAbsValue(func, minX, maxX) {
+            const steps = 100;
+            let maxVal = 0;
+            for (let i = 0; i <= steps; i++) {
+                const x = minX + (maxX - minX) * (i / steps);
+                const val = Math.abs(func(x));
+                if (val > maxVal) maxVal = val;
+            }
+            return Math.max(maxVal, 1);
+        }
+
+        /**
+         * Dibuja la representación de la viga, soportes y cargas.
+         */
+        function drawBeamCanvas(L, beamType, loadType, W, a, data) {
+            ctxBeam.clearRect(0, 0, beamCanvas.width, beamCanvas.height);
+            const H = beamCanvas.height;
+            const W_canvas = beamCanvas.width;
+            const padding = 50;
+            const scaleX = (W_canvas - 2 * padding) / L;
+
+            // Coordenadas para la línea de la viga
+            const y_beam = H / 2;
+            const x_start = padding;
+            const x_end = W_canvas - padding;
+
+            // 1. Dibujar la viga (línea horizontal)
+            ctxBeam.beginPath();
+            ctxBeam.moveTo(x_start, y_beam);
+            ctxBeam.lineTo(x_end, y_beam);
+            ctxBeam.strokeStyle = COLORS.BEAM;
+            ctxBeam.lineWidth = 6;
+            ctxBeam.stroke();
+
+            // 2. Dibujar soportes
+            const supportSize = 15;
+            ctxBeam.fillStyle = COLORS.SUPPORT;
+            ctxBeam.font = '14px Arial';
+            ctxBeam.textAlign = 'center';
+
+            if (beamType === 'simplySupported') {
+                const { xA, xB } = data.supportPos;
+                const x_A_coord = padding + xA * scaleX;
+                const x_B_coord = padding + xB * scaleX;
+                
+                // Soporte fijo (A)
+                drawFixedSupport(ctxBeam, x_A_coord, y_beam, supportSize);
+                drawReactionArrow(ctxBeam, x_A_coord, y_beam, supportSize);
+                ctxBeam.fillText('R_A', x_A_coord, y_beam + supportSize * 3);
+                
+                // Soporte móvil (B)
+                drawRollerSupport(ctxBeam, x_B_coord, y_beam, supportSize);
+                drawReactionArrow(ctxBeam, x_B_coord, y_beam, supportSize);
+                ctxBeam.fillText('R_B', x_B_coord, y_beam + supportSize * 3 + 10);
+                
+                // Texto de distancias de apoyos
+                ctxBeam.fillStyle = COLORS.AXIS;
+                ctxBeam.font = '12px Arial';
+                ctxBeam.fillText(`x=${xA.toFixed(1)}m`, x_A_coord, y_beam + 50);
+                ctxBeam.fillText(`x=${xB.toFixed(1)}m`, x_B_coord, y_beam + 50);
+
+
+            } else { // cantilever
+                const { fixationSide } = data.supportPos;
+                const x_fix = (fixationSide === 'left') ? x_start : x_end;
+                
+                drawFixedEnd(ctxBeam, x_fix, y_beam, 10, fixationSide); 
+                
+                // Flecha de reacción vertical
+                const rx_arrow_x = x_fix + (fixationSide === 'left' ? 20 : -20);
+                drawReactionArrow(ctxBeam, rx_arrow_x, y_beam, supportSize); 
+                
+                // Texto de Reacciones
+                ctxBeam.fillStyle = COLORS.SUPPORT;
+                ctxBeam.fillText('R, M', x_fix + (fixationSide === 'left' ? 40 : -40), y_beam + 40);
+            }
+
+            // 3. Dibujar la Carga
+            ctxBeam.strokeStyle = COLORS.LOAD;
+            ctxBeam.fillStyle = COLORS.LOAD;
+            ctxBeam.lineWidth = 2;
+
+            if (loadType === 'point') {
+                const a = parseFloat(document.getElementById('loadPosition').value);
+                // Carga Puntual P=W a distancia 'a'
+                const x_load = padding + a * scaleX;
+                drawPointLoad(ctxBeam, x_load, y_beam, 30); 
+                
+                // Texto de Carga
+                ctxBeam.font = '16px Arial';
+                ctxBeam.textAlign = 'center';
+                ctxBeam.fillText(`P = ${W.toFixed(1)} kN`, x_load, y_beam - 35);
+                ctxBeam.font = '12px Arial';
+                ctxBeam.fillText(`x=${a.toFixed(1)}m`, x_load, y_beam + 25);
+
+
+            } else { // udl
+                const a1 = parseFloat(document.getElementById('udlStart').value);
+                const a2 = parseFloat(document.getElementById('udlEnd').value);
+                const x_start_udl = padding + a1 * scaleX;
+                const x_end_udl = padding + a2 * scaleX;
+
+                drawUDL(ctxBeam, x_start_udl, x_end_udl, y_beam, W);
+                
+                // Texto de Carga
+                ctxBeam.font = '16px Arial';
+                ctxBeam.textAlign = 'center';
+                ctxBeam.fillText(`q = ${W.toFixed(1)} kN/m`, (x_start_udl + x_end_udl) / 2, y_beam - 40);
+                
+                // Dibujar cotas de a1 y a2 (usando los bordes del área cargada)
+                ctxBeam.font = '12px Arial';
+                ctxBeam.textAlign = 'left';
+                if (a1 > 0) ctxBeam.fillText(`x=${a1.toFixed(1)}m`, x_start_udl, y_beam + 25);
+                ctxBeam.textAlign = 'right';
+                if (a2 < L) ctxBeam.fillText(`x=${a2.toFixed(1)}m`, x_end_udl, y_beam + 25);
+            }
+
+            // 4. Longitud
+            ctxBeam.strokeStyle = COLORS.AXIS;
+            ctxBeam.beginPath();
+            ctxBeam.moveTo(x_start, y_beam + 80);
+            ctxBeam.lineTo(x_end, y_beam + 80);
+            ctxBeam.stroke();
+            ctxBeam.textAlign = 'center';
+            ctxBeam.fillStyle = COLORS.AXIS;
+            ctxBeam.fillText(`L = ${L.toFixed(1)} m`, W_canvas / 2, y_beam + 100);
+        }
+
+        /**
+         * Dibuja un diagrama (Cortante o Momento).
+         */
+        function drawDiagram(canvas, ctx, L, func, maxVal, label, isShear) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const H = canvas.height;
+            const W_canvas = canvas.width;
+            const padding = 50;
+            const scaleX = (W_canvas - 2 * padding) / L;
+            const y_axis = H / 2; // Eje horizontal
+
+            // 1. Dibujar Eje Horizontal (Cero)
+            ctx.beginPath();
+            ctx.moveTo(padding, y_axis);
+            ctx.lineTo(W_canvas - padding, y_axis);
+            ctx.strokeStyle = COLORS.AXIS;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Etiqueta del eje Y y eje X
+            ctx.fillStyle = COLORS.AXIS;
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText(label, padding - 5, y_axis - 5);
+            ctx.textAlign = 'left';
+            ctx.fillText('0', W_canvas - padding + 5, y_axis + 5);
+            
+            // 2. Dibujar el Diagrama (Recorrido)
+            const scaleY = (H / 2 - 20) / maxVal; // Escala vertical (20px de margen superior/inferior)
+            const steps = 200;
+
+            let path = [];
+            
+            for (let i = 0; i <= steps; i++) {
+                const x_coord = i * (W_canvas - 2 * padding) / steps + padding;
+                const L_coord = i * L / steps;
+                let value = func(L_coord);
+                
+                // Convenio del Signo: Positivo arriba, Negativo abajo
+                const y_coord = y_axis - value * scaleY;
+                path.push({x: x_coord, y: y_coord, val: value});
+            }
+
+            // 3. Rellenar el Diagrama (área entre la línea y el eje)
+            path.forEach((point, index) => {
+                if (index > 0) {
+                    const prevPoint = path[index - 1];
+                    
+                    // POSITIVO (Arriba) es azul, NEGATIVO (Abajo) es rojo
+                    ctx.fillStyle = point.val > 0 ? COLORS.DIAGRAM_FILL_POS : COLORS.DIAGRAM_FILL_NEG;
+                    ctx.globalAlpha = 0.5;
+
+                    ctx.beginPath();
+                    ctx.moveTo(prevPoint.x, y_axis);
+                    ctx.lineTo(prevPoint.x, prevPoint.y);
+                    ctx.lineTo(point.x, point.y);
+                    ctx.lineTo(point.x, y_axis);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.globalAlpha = 1.0;
+                }
+            });
+
+            // 4. Dibujar la línea principal (encima del relleno)
+            ctx.beginPath();
+            path.forEach((point, index) => {
+                if (index === 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            });
+            ctx.strokeStyle = COLORS.DIAGRAM_LINE;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 5. Mostrar valores máximos
+            ctx.fillStyle = COLORS.DIAGRAM_LINE;
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            
+            // Buscar el punto de máximo absoluto (para etiquetar)
+            let maxAbsValue = 0;
+            let maxAbsX = 0;
+            let maxAbsY = 0;
+
+            path.forEach(p => {
+                if (Math.abs(p.val) > Math.abs(maxAbsValue)) {
+                    maxAbsValue = p.val;
+                    maxAbsX = p.x;
+                    maxAbsY = p.y;
+                }
+            });
+            
+            if (Math.abs(maxAbsValue) > 0.1) {
+                // Posición de la etiqueta: 20px por debajo si el valor es negativo (diagrama abajo), 10px por encima si es positivo (diagrama arriba)
+                const labelOffset = (maxAbsValue < 0) ? 20 : -10;
+                ctx.fillText(`${maxAbsValue.toFixed(1)}`, maxAbsX, maxAbsY + labelOffset);
+            }
+        }
+
+        // ==========================================================
+        // FUNCIONES AUXILIARES DE DIBUJO DE SOPORTES Y CARGAS
+        // ==========================================================
+
+        function drawFixedSupport(ctx, x, y, size) {
+            // Triángulo
+            ctx.beginPath();
+            ctx.moveTo(x - size, y);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x, y + size * 1.5);
+            ctx.closePath();
+            ctx.fill();
+            // Suelo
+            ctx.strokeStyle = COLORS.BEAM;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x - size * 1.5, y + size * 1.5);
+            ctx.lineTo(x + size * 1.5, y + size * 1.5);
+            ctx.stroke();
+        }
+
+        function drawRollerSupport(ctx, x, y, size) {
+            // Triángulo
+            ctx.beginPath();
+            ctx.moveTo(x - size, y);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x, y + size * 1.5);
+            ctx.closePath();
+            ctx.fill();
+            // Círculo
+            ctx.beginPath();
+            ctx.arc(x, y + size * 1.5 + 3, 5, 0, Math.PI * 2);
+            ctx.fill();
+            // Suelo
+            ctx.strokeStyle = COLORS.BEAM;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x - size * 1.5, y + size * 1.5 + 8);
+            ctx.lineTo(x + size * 1.5, y + size * 1.5 + 8);
+            ctx.stroke();
+        }
+        
+        function drawFixedEnd(ctx, x, y, width, side = 'left') {
+            ctx.fillStyle = COLORS.SUPPORT;
+            // Relleno del área de empotramiento
+            const x_fill = side === 'left' ? x - width : x;
+            ctx.fillRect(x_fill, y - 20, width, 40);
+            
+            // Sombreado (eclosión)
+            ctx.strokeStyle = COLORS.SUPPORT;
+            ctx.lineWidth = 2;
+            const x_hatch_end = side === 'left' ? x - width : x + width;
+
+            for (let i = -20; i <= 20; i += 5) {
+                ctx.beginPath();
+                ctx.moveTo(x, y + i);
+                ctx.lineTo(x_hatch_end, y + i + 5);
+                ctx.stroke();
+            }
+        }
+
+        function drawReactionArrow(ctx, x, y, size) {
+            const arrowHeight = 30; 
+            const y_bottom = y + size * 2;
+            const y_top = y_bottom - arrowHeight;
+            
+            // Línea (Upward)
+            ctx.strokeStyle = COLORS.SUPPORT;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y_bottom);
+            ctx.lineTo(x, y_top);
+            ctx.stroke();
+            
+            // Cabeza de flecha (Pointing up)
+            ctx.fillStyle = COLORS.SUPPORT;
+            ctx.beginPath();
+            ctx.moveTo(x - 5, y_top);
+            ctx.lineTo(x + 5, y_top);
+            ctx.lineTo(x, y_top - 10);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawPointLoad(ctx, x, y, arrowSize) {
+            const y_top = y - arrowSize; 
+            const y_beam = y;            
+            const headSize = 10;
+
+            // Flecha (Downward)
+            ctx.strokeStyle = COLORS.LOAD;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y_top);
+            ctx.lineTo(x, y_beam);
+            ctx.stroke();
+
+            // Cabeza de flecha (Triangle pointing down to the beam)
+            ctx.fillStyle = COLORS.LOAD;
+            ctx.beginPath();
+            ctx.moveTo(x - 5, y_beam);
+            ctx.lineTo(x + 5, y_beam);
+            ctx.lineTo(x, y_beam + headSize); 
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawUDL(ctx, xStart, xEnd, yBeam, W) {
+            const arrowSpacing = 15;
+            const arrowLength = 25;
+            const yLoad = yBeam - arrowLength; // Línea superior de la carga
+            const headSize = 5;
+            
+            // Dibuja el área de carga (rectángulo)
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = COLORS.LOAD;
+            ctx.fillRect(xStart, yLoad, xEnd - xStart, arrowLength + headSize);
+            ctx.globalAlpha = 1.0;
+
+            // Dibuja la línea superior de la carga distribuida
+            ctx.strokeStyle = COLORS.LOAD;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(xStart, yLoad);
+            ctx.lineTo(xEnd, yLoad);
+            ctx.stroke();
+
+            // Dibuja las flechas (apuntando hacia abajo)
+            ctx.fillStyle = COLORS.LOAD;
+            for (let x = xStart + arrowSpacing / 2; x < xEnd; x += arrowSpacing) {
+                // Flecha
+                ctx.beginPath();
+                ctx.moveTo(x, yLoad);
+                ctx.lineTo(x, yBeam);
+                ctx.stroke();
+                
+                // Cabeza de flecha (Pointing down)
+                ctx.beginPath();
+                ctx.moveTo(x - headSize/2, yBeam);
+                ctx.lineTo(x + headSize/2, yBeam);
+                ctx.lineTo(x, yBeam + headSize);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -10,5 +10,1269 @@ Contacto: josmavega@gmail.com
 Instagram: @_tecnologiaymas
 ================================================================================
 -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de CA y Entrenador RLC</title>
+    <!-- Carga de Tailwind CSS para un diseño moderno y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- INICIO: INTEGRACIÓN DE KaTeX para renderizar símbolos matemáticos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" xintegrity="sha384-Gvr4xW9q52/kF4gXQ+eY2/G/G5Xl1gB0n4P/iWnS/o7w1i4n6Q8w2L9e3a5F4S9d-6514c8b58a3f/G5Xl1gB0n4P/iWnS/o7w1i4n6Q8w2L9e3a5F4S9q6B/9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" xintegrity="sha384-YcQ4A8s/gA6C/l1VlM0z5/gG5Xl1gB0n4P/iWnS/o7w1i4n6Q8w2L9e3a5F4S9q6B/9" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" xintegrity="sha384-+v9e2t8+2w/c3y+o3+5oXFf6Jb5j2+Gz/S9H9a2P/j5L1+6g8C2V5l4+F5D9/4" crossorigin="anonymous"></script>
+    <!-- FIN: INTEGRACIÓN DE KaTeX -->
 
-<!-- Aquí irá tu código HTML del Simulador de Corriente Alterna y RLC -->
+    <style>
+        /* Aplicando un fondo oscuro y la fuente Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e; /* Fondo oscuro principal */
+            color: #ffffff;
+        }
+        /* Estilos generales para los canvas */
+        canvas {
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease-in-out;
+            margin: auto; /* Centrar el canvas */
+        }
+        canvas:hover {
+            transform: translateY(-2px);
+        }
+        /* Estilos para el slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #4f46e5; /* indigo-600 */
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #c084fc; /* purple-400 */
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #6d28d9; /* violet-700 */
+        }
+        input[type=number] {
+            color: white;
+            background-color: #4b5563; /* gray-600 */
+            border: 1px solid #6b7280;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        select {
+            color: white;
+            background-color: #4b5563;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        /* Estilos para las pestañas activas */
+        .tab-active {
+            border-bottom: 3px solid #a78bfa; /* violet-400 */
+            color: #ffffff;
+        }
+        /* Estilo para los cálculos paso a paso dentro del desplegable */
+        .calculation-step {
+            padding: 0.75rem;
+            background-color: #374151; /* gray-700 */
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            border-left: 4px solid #f472b6; /* pink-400 */
+        }
+        .calculation-step strong {
+            color: #4ade80; /* green-400 */
+            font-weight: bold;
+        }
+        /* Estilo para el resumen del desplegable */
+        details summary {
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #4b5563; /* gray-600 */
+            border-radius: 0.75rem;
+            font-weight: bold;
+            color: #e5e7eb;
+            transition: background-color 0.2s;
+        }
+        details summary:hover {
+            background-color: #6b7280; /* gray-500 */
+        }
+        /* Ajuste para KaTeX para centrar las ecuaciones inline */
+        .katex {
+            font-size: 1em !important;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 min-h-screen">
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-8 text-purple-300">
+            Simulador de CA para Bachillerato
+        </h1>
+
+        <!-- Selector de Pestañas -->
+        <div class="flex border-b border-gray-700 mb-8">
+            <button class="tab-btn px-6 py-3 text-lg font-semibold text-gray-400 hover:text-white transition tab-active" data-tab="phasors">
+                1. Fasores y Ondas
+            </button>
+            <button class="tab-btn px-6 py-3 text-lg font-semibold text-gray-400 hover:text-white transition" data-tab="rlc">
+                2. Entrenador de Circuitos RLC
+            </button>
+        </div>
+
+        <!-- SECCIÓN 1: SIMULADOR DE ONDAS Y FASORES -->
+        <div id="phasors" class="tab-content">
+            <p class="text-center text-gray-300 mb-10">
+                Visualización dinámica del diagrama de Fasores (Fresnel) y las ondas de Tensión e Intensidad en el dominio del tiempo.
+            </p>
+
+            <!-- Controles Fasores -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-10 flex flex-col lg:flex-row gap-6">
+                <!-- Control de Fases -->
+                <div class="lg:w-1/4">
+                    <label class="block text-sm font-medium mb-2 text-purple-400">Selección de Fases</label>
+                    <div id="phase-selector" class="flex flex-wrap gap-4 p-3 bg-gray-700 rounded-lg">
+                        <button data-phases="1" class="phase-btn px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition active">Monofásico</button>
+                        <button data-phases="2" class="phase-btn px-4 py-2 bg-gray-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition">Bifásico</button>
+                        <button data-phases="3" class="phase-btn px-4 py-2 bg-gray-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition">Trifásico</button>
+                    </div>
+                </div>
+
+                <!-- Control de Amplitudes -->
+                <div class="lg:w-1/4">
+                    <label class="block text-sm font-medium mb-2 text-purple-400">Amplitudes Máximas ($V_{max}$, $I_{max}$)</label>
+                    <div class="flex gap-2 mb-2">
+                        <input type="number" id="v_max_input" value="100" min="10" max="200" step="5" class="w-1/2 p-2" placeholder="Vmax">
+                        <input type="number" id="i_max_input" value="70" min="10" max="150" step="5" class="w-1/2 p-2" placeholder="Imax">
+                    </div>
+                    <p class="text-xs text-gray-400">V (púrpura) / I (rosa)</p>
+                </div>
+
+                <!-- Control de Ángulo de Desfase -->
+                <div class="lg:w-1/4">
+                    <label for="phase-lag" class="block text-sm font-medium mb-2 text-purple-400">
+                        Ángulo de Desfase ($\phi$): <span id="lag-value" class="font-bold text-pink-400">0°</span>
+                    </label>
+                    <input type="range" id="phase-lag" min="-90" max="90" value="0" step="5">
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span>-90° (Capacitivo)</span>
+                        <span>0° (Resistivo)</span>
+                        <span>+90° (Inductivo)</span>
+                    </div>
+                </div>
+
+                <!-- Control de Animación -->
+                <div class="lg:w-1/4">
+                    <label class="block text-sm font-medium mb-2 text-purple-400">Control de Animación</label>
+                    <div class="flex gap-4 p-3 bg-gray-700 rounded-lg">
+                        <button id="play-pause-btn" class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition">
+                            ▶ Reproducir
+                        </button>
+                        <button id="step-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition" disabled>
+                            Paso a Paso
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de Visualización Fasores/Ondas -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="flex flex-col items-center bg-gray-800 p-4 rounded-xl">
+                    <h2 class="text-xl font-semibold mb-4 text-purple-300">Diagrama de Fasores (Fresnel)</h2>
+                    <canvas id="fresnelCanvas" width="500" height="500" class="w-full h-auto max-w-sm bg-gray-900"></canvas>
+                </div>
+                <div class="flex flex-col items-center bg-gray-800 p-4 rounded-xl">
+                    <h2 class="text-xl font-semibold mb-4 text-purple-300">Ondas de Tensión (V) e Intensidad (I)</h2>
+                    <canvas id="waveCanvas" width="500" height="500" class="w-full h-auto max-w-sm bg-gray-900"></canvas>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center text-sm text-gray-400">
+                <span class="mr-4">Fasor / Onda de Tensión (V): <span class="font-bold text-purple-400">███</span></span>
+                <span>Fasor / Onda de Intensidad (I): <span class="font-bold text-pink-400">███</span></span>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: CALCULADORA DE CIRCUITOS RLC -->
+        <div id="rlc" class="tab-content hidden">
+            <p class="text-center text-gray-300 mb-10">
+                Calcula la impedancia, el desfase y el triángulo de impedancias para el circuito RLC que definas en **CA o CC**.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Columna 1: Controles y Valores -->
+                <div class="lg:col-span-1 bg-gray-800 p-6 rounded-xl shadow-2xl space-y-6">
+                    <h3 class="text-xl font-bold text-pink-400">1. Definición del Circuito</h3>
+                    
+                    <!-- Tipo de Fuente -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-purple-400">Tipo de Fuente</label>
+                        <select id="source-type" class="w-full">
+                            <option value="AC">Corriente Alterna (CA)</option>
+                            <option value="DC">Corriente Continua (CC)</option>
+                        </select>
+                    </div>
+
+                    <!-- Tipo de Circuito -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-purple-400">Tipo de Circuito Serie</label>
+                        <select id="circuit-type" class="w-full">
+                            <option value="RLC">R-L-C</option>
+                            <option value="RL">R-L</option>
+                            <option value="RC">R-C</option>
+                            <option value="LC">L-C (R=0)</option>
+                        </select>
+                    </div>
+
+                    <!-- Valores de la Fuente -->
+                    <h4 class="text-lg font-semibold text-gray-300 mt-4">Fuente CA/CC</h4>
+
+                    <!-- Selector Vmax/Vrms -->
+                    <div class="flex gap-2">
+                        <div class="w-1/2">
+                            <label for="voltage-type" class="block text-xs font-medium mb-1 text-gray-400">Tipo de Tensión</label>
+                            <select id="voltage-type" class="w-full">
+                                <option value="Vmax">Máxima ($V_{max}$)</option>
+                                <option value="Vrms">Eficaz ($V_{rms}$)</option>
+                            </select>
+                        </div>
+                        <div class="w-1/2">
+                            <label for="rlc-vmax" id="voltage-label" class="block text-xs font-medium mb-1 text-gray-400">Tensión Máxima (V)</label>
+                            <input type="number" id="rlc-vmax" value="10" min="1" step="1" class="w-full">
+                        </div>
+                    </div>
+                    <!-- Fórmula de Conversión -->
+                    <p id="conversion-formula" class="text-xs text-gray-400 italic mt-1 text-right">
+                        <!-- Contenido renderizado por JS/KaTeX -->
+                    </p>
+
+                    <div>
+                        <label for="rlc-freq" class="block text-sm font-medium mb-1 text-gray-400">Frecuencia (f en Hz) <span id="freq-note" class="text-xs text-red-300">(CA)</span></label>
+                        <input type="number" id="rlc-freq" value="50" min="1" step="1" class="w-full">
+                    </div>
+
+                    <!-- Valores de los Componentes -->
+                    <h4 class="text-lg font-semibold text-gray-300 mt-4">Componentes</h4>
+                    <div>
+                        <label for="rlc-r" class="block text-sm font-medium mb-1 text-gray-400">Resistencia (R en $\Omega$)</label>
+                        <input type="number" id="rlc-r" value="10" min="0" step="1" class="w-full">
+                    </div>
+                    <div>
+                        <label for="rlc-l" class="block text-sm font-medium mb-1 text-gray-400">Inductancia (L en H)</label>
+                        <input type="number" id="rlc-l" value="0.1" min="0" step="0.01" class="w-full">
+                    </div>
+                    <div>
+                        <label for="rlc-c" class="block text-sm font-medium mb-1 text-gray-400">Capacitancia (C en F)</label>
+                        <input type="number" id="rlc-c" value="0.0001" min="0" step="0.00001" class="w-full">
+                    </div>
+
+                    <button id="calculate-rlc" class="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition mt-4">
+                        Calcular Circuito
+                    </button>
+                </div>
+
+                <!-- Columna 2: Cálculos y Diagramas -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Diagrama Esquemático -->
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
+                        <h3 class="text-xl font-bold text-pink-400 mb-4">2. Diagrama Esquemático</h3>
+                        <canvas id="circuitSchematicCanvas" width="300" height="300" class="w-full h-auto max-w-sm bg-gray-900 mx-auto border border-gray-700"></canvas>
+                        <p id="schematic-note" class="text-center text-xs text-gray-400 mt-2">Circuito en serie. La flecha indica la dirección de la corriente (I).</p>
+                    </div>
+
+                    <!-- Cálculos Comprensibles - DESPLEGABLE PASO A PASO -->
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
+                        <h3 class="text-xl font-bold text-pink-400 mb-4">3. Cálculos Detallados</h3>
+                        <details open>
+                            <summary>Ver Cálculos Paso a Paso (CA / CC)</summary>
+                            <div id="rlc-step-by-step" class="mt-4 space-y-2">
+                                <!-- Aquí se inyectan los pasos de cálculo -->
+                                <div class="calculation-step text-gray-400">Introduce los valores y pulsa **Calcular Circuito**.</div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- Triángulo de Impedancias -->
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
+                        <h3 class="text-xl font-bold text-pink-400 mb-4">4. Triángulo de Impedancias (R, X, Z)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Canvas para el Triángulo -->
+                            <canvas id="impedanceTriangleCanvas" width="300" height="300" class="w-full h-auto max-w-xs bg-gray-900 mx-auto"></canvas>
+
+                            <!-- Valores de Potencia Finales -->
+                            <div class="space-y-3">
+                                <div class="p-3 bg-gray-700 rounded-lg"><span class="block text-xs text-gray-400">Impedancia Total (Z):</span> <span class="font-bold text-white" id="calc-z">0.00 $\Omega$</span></div>
+                                <div class="p-3 bg-gray-700 rounded-lg"><span class="block text-xs text-gray-400">Corriente Máxima ($I_{max}$):</span> <span class="font-bold text-white" id="calc-imax">0.00 A</span></div>
+                                <div class="p-3 bg-gray-700 rounded-lg"><span class="block text-xs text-gray-400">Ángulo de Fase ($\phi$):</span> <span class="font-bold text-white" id="calc-phi">0.00 °</span></div>
+                                <div class="p-3 bg-gray-700 rounded-lg"><span class="block text-xs text-gray-400">Factor de Potencia ($\cos(\phi)$):</span> <span class="font-bold text-white" id="calc-fp">0.000</span></div>
+                            </div>
+                        </div>
+                        <p id="power-type" class="text-center text-sm mt-4 font-semibold text-yellow-300">
+                            Tipo de carga: Resistiva Pura
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Función para renderizar el código LaTeX dentro de los elementos HTML
+        function renderAllMath() {
+            // Espera a que KaTeX esté cargado y usa auto-render
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false }
+                    ],
+                    throwOnError: false
+                });
+            } else {
+                console.warn("KaTeX no está cargado. Retrasando la renderización.");
+                setTimeout(renderAllMath, 100); // Intenta de nuevo en 100ms
+            }
+        }
+
+        // =========================================================================
+        // === CONFIGURACIÓN Y VARIABLES GLOBALES ===
+        // =========================================================================
+
+        const fresnelCanvas = document.getElementById('fresnelCanvas');
+        const waveCanvas = document.getElementById('waveCanvas');
+        const fCtx = fresnelCanvas.getContext('2d');
+        const wCtx = waveCanvas.getContext('2d');
+        const phaseLagInput = document.getElementById('phase-lag');
+        const lagValueSpan = document.getElementById('lag-value');
+        const VMaxInput = document.getElementById('v_max_input');
+        const IMaxInput = document.getElementById('i_max_input');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const stepBtn = document.getElementById('step-btn');
+        const phaseBtns = document.querySelectorAll('.phase-btn');
+
+        let V_MAX = 100; 
+        let I_MAX = 70;  
+        const OMEGA = 0.05; 
+        let phaseLagDegrees = 0; 
+        let phaseLagRadians = 0; 
+        let numPhases = 1; 
+        let time = 0;
+        let animationFrameId = null; 
+        let isPlaying = false; 
+
+        // RLC
+        const impedanceTriangleCanvas = document.getElementById('impedanceTriangleCanvas'); 
+        const circuitSchematicCanvas = document.getElementById('circuitSchematicCanvas');
+        const itCtx = impedanceTriangleCanvas.getContext('2d'); 
+        const csCtx = circuitSchematicCanvas.getContext('2d'); 
+        
+        const RLC_INPUTS = {
+            sourceType: document.getElementById('source-type'), 
+            circuitType: document.getElementById('circuit-type'),
+            voltageType: document.getElementById('voltage-type'), 
+            voltageLabel: document.getElementById('voltage-label'), 
+            conversionFormula: document.getElementById('conversion-formula'), 
+            vmax: document.getElementById('rlc-vmax'), 
+            freq: document.getElementById('rlc-freq'),
+            r: document.getElementById('rlc-r'),
+            l: document.getElementById('rlc-l'),
+            c: document.getElementById('rlc-c'),
+        };
+        const RLC_CALCS_CONTAINER = document.getElementById('rlc-step-by-step');
+
+        const RLC_CALCS_OUTPUT = {
+            // Valores Clave para mostrar en el resumen
+            z: document.getElementById('calc-z'),
+            imax: document.getElementById('calc-imax'),
+            phi: document.getElementById('calc-phi'),
+            fp: document.getElementById('calc-fp'),
+            // Notas
+            type: document.getElementById('power-type'),
+            freqNote: document.getElementById('freq-note'), 
+            schematicNote: document.getElementById('schematic-note'),
+        };
+
+        // Constantes
+        const SQRT2 = Math.sqrt(2);
+
+        // Colores
+        const V_COLOR = '#c084fc'; // purple-400 (V/S/Z)
+        const I_COLOR = '#f472b6'; // pink-400 (I/Q/X)
+        const R_COLOR = '#4ade80'; // green-400 (R/P)
+        const AXIS_COLOR = '#6b7280'; // gray-500 (Ejes más visibles)
+        const TEXT_COLOR = '#e5e7eb'; // gray-200
+        const DC_COLOR = '#3b82f6'; // blue-500
+
+        // =========================================================================
+        // === GESTIÓN DE PESTAÑAS ===
+        // =========================================================================
+
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+                
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('tab-active');
+                });
+                button.classList.add('tab-active');
+
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(targetTab).classList.remove('hidden');
+
+                if (targetTab === 'rlc') {
+                    // FORZAR REDIBUJADO RLC al abrir la pestaña
+                    impedanceTriangleCanvas.width = impedanceTriangleCanvas.parentElement.clientWidth;
+                    circuitSchematicCanvas.width = circuitSchematicCanvas.parentElement.clientWidth;
+                    updateRLCInputs(); // Esto llama a calculateRLC()
+                } else if (targetTab === 'phasors') {
+                    drawSimulations();
+                }
+            });
+        });
+
+        // =========================================================================
+        // === FUNCIONALIDAD FASORES Y ONDAS ===
+        // =========================================================================
+
+        // 1. DIBUJO Y ANIMACIÓN
+        
+        function drawPhasor(ctx, cx, cy, radius, angle, color, label) {
+            const x = cx + radius * Math.cos(angle);
+            const y = cy - radius * Math.sin(angle); 
+            
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, 6, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(cx, y);
+            ctx.strokeStyle = color + '80'; 
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.setLineDash([]); 
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 16px Inter';
+            let textX = x + (x > cx ? 10 : -30);
+            let textY = y + (y > cy ? 15 : -5); 
+            ctx.fillText(label, textX, textY);
+        }
+
+        function drawFresnel(time) {
+            const W = fresnelCanvas.width;
+            const H = fresnelCanvas.height;
+            const CX = W / 2;
+            const CY = H / 2;
+            // Aumentado el radio para mejor visibilidad (antes era / 2.5)
+            const R_MAX = Math.min(W, H) / 2.2; 
+
+            fCtx.clearRect(0, 0, W, H);
+            
+            fCtx.strokeStyle = AXIS_COLOR;
+            fCtx.lineWidth = 2; // Ejes un poco más gruesos
+            fCtx.beginPath();
+            fCtx.moveTo(CX, 0); fCtx.lineTo(CX, H); 
+            fCtx.moveTo(0, CY); fCtx.lineTo(W, CY); 
+            fCtx.stroke();
+            
+            fCtx.fillStyle = TEXT_COLOR;
+            fCtx.font = '14px Inter';
+            fCtx.fillText('Eje Real', W - 60, CY - 10);
+            fCtx.fillText('Eje Im', CX + 10, 15);
+
+            fCtx.beginPath();
+            fCtx.arc(CX, CY, R_MAX, 0, 2 * Math.PI);
+            fCtx.strokeStyle = AXIS_COLOR;
+            fCtx.lineWidth = 1;
+            fCtx.stroke();
+            
+            const angle_wt = time * OMEGA;
+            let v1_angle = 0;
+            let i1_angle = 0;
+
+            for (let i = 0; i < numPhases; i++) {
+                const basePhase = i * (2 * Math.PI / numPhases); 
+                
+                const v_angle = angle_wt + basePhase; 
+                const i_angle = angle_wt - phaseLagRadians + basePhase; 
+                
+                if (i === 0) { v1_angle = v_angle; i1_angle = i_angle; }
+
+                const v_radius = R_MAX * (V_MAX / 200); // Normalizado
+                const i_radius = R_MAX * (I_MAX / 150); // Normalizado
+
+                drawPhasor(fCtx, CX, CY, v_radius, v_angle, V_COLOR, `V${i + 1}`);
+
+                if (numPhases === 1 || phaseLagDegrees === 0) {
+                     drawPhasor(fCtx, CX, CY, i_radius, i_angle, I_COLOR, `I${i + 1}`);
+                }
+            }
+            
+            if (numPhases === 1 && Math.abs(phaseLagRadians) > 0.01) {
+                fCtx.strokeStyle = TEXT_COLOR + '80';
+                fCtx.lineWidth = 1;
+                fCtx.beginPath();
+                
+                const arcRadius = R_MAX / 4;
+                
+                const startAngle = (phaseLagRadians > 0) ? i1_angle : v1_angle;
+                const endAngle = (phaseLagRadians > 0) ? v1_angle : i1_angle;
+                
+                fCtx.arc(CX, CY, arcRadius, startAngle, endAngle, phaseLagRadians > 0); 
+                fCtx.stroke();
+
+                const midAngle = (v1_angle + i1_angle) / 2;
+                const textRadius = arcRadius + 15;
+                const phiX = CX + textRadius * Math.cos(midAngle);
+                const phiY = CY - textRadius * Math.sin(midAngle); 
+                
+                fCtx.fillStyle = TEXT_COLOR;
+                fCtx.font = 'bold 16px Inter';
+                fCtx.fillText('φ', phiX - 8, phiY + 5); 
+            }
+        }
+
+        function drawSineWave(time) {
+            const W = waveCanvas.width;
+            const H = waveCanvas.height;
+            const CY = H / 2;
+            const X_PI_RANGE = 8 * Math.PI; 
+            const X_SCALE = W / X_PI_RANGE; 
+            const Y_SCALE = (H * 0.4); 
+
+            wCtx.clearRect(0, 0, W, H);
+
+            wCtx.strokeStyle = AXIS_COLOR;
+            wCtx.lineWidth = 2; // Ejes un poco más gruesos
+            wCtx.beginPath();
+            wCtx.moveTo(0, CY); wCtx.lineTo(W, CY); 
+            wCtx.moveTo(10, 0); wCtx.lineTo(10, H);
+            wCtx.stroke();
+            
+            const angle_wt = time * OMEGA;
+            const current_wt_mod = angle_wt % (X_PI_RANGE);
+
+            const plotWave = (max, phase, color, label) => {
+                const max_norm = max / 200; // Normalizado
+                wCtx.beginPath();
+                wCtx.strokeStyle = color;
+                wCtx.lineWidth = 3;
+
+                for (let i = 0; i <= W; i += 2) {
+                    const wave_angle = (i / X_SCALE) - phase; 
+                    const y_val = CY - Y_SCALE * max_norm * Math.sin(wave_angle);
+                    wCtx.lineTo(i, y_val);
+                }
+                wCtx.stroke();
+
+                const instantaneous_x_position = current_wt_mod * X_SCALE;
+                const instantaneous_y = CY - Y_SCALE * max_norm * Math.sin(angle_wt - phase);
+
+                wCtx.setLineDash([5, 5]);
+                wCtx.beginPath();
+                wCtx.moveTo(instantaneous_x_position, instantaneous_y);
+                wCtx.lineTo(instantaneous_x_position, CY); 
+                wCtx.strokeStyle = color + '80';
+                wCtx.lineWidth = 1;
+                wCtx.stroke();
+                wCtx.setLineDash([]);
+            
+                wCtx.fillStyle = color;
+                wCtx.beginPath();
+                wCtx.arc(instantaneous_x_position, instantaneous_y, 6, 0, 2 * Math.PI);
+                wCtx.fill();
+            
+                wCtx.fillStyle = color;
+                wCtx.font = '16px Inter';
+                wCtx.fillText(label, instantaneous_x_position - 10, CY + 20);
+            };
+            
+            for (let i = 0; i < numPhases; i++) {
+                const basePhase = i * (2 * Math.PI / numPhases); 
+                plotWave(V_MAX, -basePhase, V_COLOR, `V${i + 1}`);
+
+                if (numPhases === 1 || phaseLagDegrees === 0) {
+                    plotWave(I_MAX, phaseLagRadians - basePhase, I_COLOR, `I${i + 1}`);
+                }
+            }
+
+            wCtx.fillStyle = TEXT_COLOR;
+            wCtx.font = '14px Inter';
+            wCtx.fillText('Amplitud', 15, 20);
+            wCtx.fillText('Ángulo (ωt)', W - 90, CY - 10);
+            wCtx.fillText('+Vmax', 15, CY - Y_SCALE + 5);
+            wCtx.fillText('-Vmax', 15, CY + Y_SCALE + 5);
+
+            wCtx.fillStyle = AXIS_COLOR;
+            const labels = ['0', 'π', '2π', '3π', '4π', '5π', '6π', '7π', '8π']; 
+            for (let i = 0; i < labels.length; i++) {
+                const x = i * (W / 8);
+                wCtx.fillText(labels[i], x + 5, CY + 15);
+                wCtx.beginPath();
+                wCtx.moveTo(x, CY - 5);
+                wCtx.lineTo(x, CY + 5);
+                wCtx.stroke();
+            }
+        }
+
+        function drawSimulations() {
+            const containerWidth = fresnelCanvas.parentElement.clientWidth;
+            const size = Math.min(containerWidth, 500); 
+
+            fresnelCanvas.width = size;
+            fresnelCanvas.height = size;
+            waveCanvas.width = size;
+            waveCanvas.height = size;
+
+            drawFresnel(time);
+            drawSineWave(time);
+        }
+
+        function animate() {
+            if (isPlaying) {
+                time += 1; 
+                drawSimulations();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+        
+        /** Actualiza los valores de Vmax, Imax y desfase y redibuja. */
+        function updatePhasorSettings() {
+            V_MAX = parseFloat(VMaxInput.value) || 100;
+            I_MAX = parseFloat(IMaxInput.value) || 70;
+            
+            // Asegurar límites mínimos
+            if (V_MAX < 10) V_MAX = 10;
+            if (I_MAX < 10) I_MAX = 10;
+
+            phaseLagDegrees = parseFloat(phaseLagInput.value);
+            phaseLagRadians = phaseLagDegrees * (Math.PI / 180);
+            lagValueSpan.textContent = `${phaseLagDegrees}°`;
+            
+            drawSimulations();
+        }
+
+        // 2. LISTENERS DE FASORES
+        
+        // Control de Fases (Monofásico, Bifásico, Trifásico)
+        phaseBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                // Actualizar estado visual
+                phaseBtns.forEach(btn => {
+                    btn.classList.remove('bg-purple-600', 'active');
+                    btn.classList.add('bg-gray-600');
+                });
+                button.classList.add('bg-purple-600', 'active');
+                button.classList.remove('bg-gray-600');
+                
+                // Actualizar estado del modelo
+                numPhases = parseInt(button.dataset.phases);
+                
+                // Redibujar
+                drawSimulations();
+            });
+        });
+
+        // Control de Amplitudes y Desfase
+        VMaxInput.addEventListener('input', updatePhasorSettings);
+        IMaxInput.addEventListener('input', updatePhasorSettings);
+        phaseLagInput.addEventListener('input', updatePhasorSettings);
+
+        // Control de Animación
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                cancelAnimationFrame(animationFrameId);
+                isPlaying = false;
+                playPauseBtn.textContent = '▶ Reproducir';
+                playPauseBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                playPauseBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                stepBtn.disabled = false;
+            } else {
+                isPlaying = true;
+                playPauseBtn.textContent = '⏸ Pausar';
+                playPauseBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                playPauseBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                stepBtn.disabled = true;
+                animate();
+            }
+        });
+
+        stepBtn.addEventListener('click', () => {
+            if (!isPlaying) {
+                time += 5; // Incremento pequeño para el paso a paso
+                drawSimulations();
+            }
+        });
+
+        // =========================================================================
+        // === FUNCIONALIDAD RLC CIRCUITOS (Cálculos y UI Simplificada) ===
+        // =========================================================================
+
+        document.getElementById('calculate-rlc').addEventListener('click', calculateRLC);
+        
+        ['sourceType', 'circuitType', 'voltageType'].forEach(id => {
+            RLC_INPUTS[id].addEventListener('change', updateRLCInputs);
+        });
+        
+        // Maneja el selector de Vmax/Vrms
+        RLC_INPUTS.voltageType.addEventListener('change', () => {
+            const type = RLC_INPUTS.voltageType.value;
+            if (type === 'Vmax') {
+                RLC_INPUTS.voltageLabel.textContent = 'Tensión Máxima (V)';
+                RLC_INPUTS.conversionFormula.innerHTML = '<i>$$V_{rms} = \\frac{V_{max}}{\\sqrt{2}}$$</i>';
+            } else {
+                RLC_INPUTS.voltageLabel.textContent = 'Tensión Eficaz (V)';
+                RLC_INPUTS.conversionFormula.innerHTML = '<i>$$V_{max} = V_{rms} \\cdot \\sqrt{2}$$</i>';
+            }
+            renderAllMath(); // Renderiza el KaTeX de la fórmula
+            calculateRLC();
+        });
+
+
+        // Habilita/deshabilita inputs de L/C según el tipo de circuito (RL, RC, etc.)
+        function updateRLCInputs() {
+            const type = RLC_INPUTS.circuitType.value;
+            const sourceType = RLC_INPUTS.sourceType.value;
+            
+            RLC_INPUTS.r.disabled = false;
+            RLC_INPUTS.l.disabled = false;
+            RLC_INPUTS.c.disabled = false;
+            
+            RLC_INPUTS.voltageType.disabled = (sourceType === 'DC'); // Deshabilita selector en CC
+
+            if (type === 'RL') RLC_INPUTS.c.disabled = true;
+            if (type === 'RC') RLC_INPUTS.l.disabled = true;
+            if (type === 'LC') RLC_INPUTS.r.disabled = true;
+
+            if (sourceType === 'DC') {
+                RLC_INPUTS.freq.disabled = true;
+                RLC_CALCS_OUTPUT.freqNote.textContent = '(CC: f = 0 Hz)';
+                RLC_INPUTS.voltageLabel.textContent = 'Tensión Continua (V)';
+                RLC_INPUTS.conversionFormula.textContent = '(La Vrms y Vmax no se usan en CC)';
+            } else {
+                RLC_INPUTS.freq.disabled = false;
+                RLC_CALCS_OUTPUT.freqNote.textContent = '(CA)';
+                // Activar el listener de cambio para restaurar etiquetas
+                RLC_INPUTS.voltageType.dispatchEvent(new Event('change'));
+            }
+            
+            calculateRLC();
+        }
+
+        /** Añade un paso de cálculo al contenedor con nomenclatura simple */
+        function addCalculationStep(formula, result, unit) {
+            RLC_CALCS_CONTAINER.innerHTML += `
+                <div class="calculation-step">
+                    ${formula} <br>
+                    Resultado: <strong>${result} ${unit}</strong>
+                </div>
+            `;
+        }
+
+
+        /** Realiza todos los cálculos del circuito RLC y actualiza la UI */
+        function calculateRLC() {
+            // 1. Obtener valores y limpiar UI
+            RLC_CALCS_CONTAINER.innerHTML = '';
+
+            const type = RLC_INPUTS.circuitType.value;
+            const inputV = parseFloat(RLC_INPUTS.vmax.value) || 0;
+            const vType = RLC_INPUTS.voltageType.value;
+            const f = parseFloat(RLC_INPUTS.freq.value) || 0;
+            const sourceType = RLC_INPUTS.sourceType.value;
+            const isDC = sourceType === 'DC';
+            
+            let R_val = parseFloat(RLC_INPUTS.r.value) || 0;
+            let L_val = parseFloat(RLC_INPUTS.l.value) || 0;
+            let C_val = parseFloat(RLC_INPUTS.c.value) || 0;
+            
+            if (type === 'RL') C_val = 0;
+            if (type === 'RC') L_val = 0;
+            if (type === 'LC') R_val = 0;
+
+            let V_max; // Tensión Máxima siempre usada para los cálculos de Imax
+            let V_rms; // Tensión Eficaz, calculada para la fórmula
+            
+            // CONVERSIÓN DE TENSIÓN
+            if (isDC) {
+                V_max = inputV;
+                V_rms = V_max; // En CC son iguales
+                addCalculationStep(
+                    `0. Tensión de Fuente: $V = ${V_max.toFixed(2)}$`, 
+                    `${V_max.toFixed(2)}`, `V (Continua)`
+                );
+            } else {
+                if (vType === 'Vrms') {
+                    V_rms = inputV;
+                    V_max = V_rms * SQRT2;
+                    addCalculationStep(
+                        `0. Tensión Máxima ($V_{max}$): $V_{max} = V_{rms} \\cdot \\sqrt{2} = ${V_rms.toFixed(2)} \\cdot 1.414$`, 
+                        `${V_max.toFixed(2)}`, `V`
+                    );
+                } else { // Vmax
+                    V_max = inputV;
+                    V_rms = V_max / SQRT2;
+                    addCalculationStep(
+                        `0. Tensión Máxima ($V_{max}$): $V_{max} = ${V_max.toFixed(2)}$`, 
+                        `${V_max.toFixed(2)}`, `V`
+                    );
+                }
+            }
+
+
+            let omega, XL, XC, X_total, Z, I_max, phi_rad, phi_deg;
+
+            // 2. Cálculo en CC (DC)
+            if (isDC) {
+                omega = 0;
+                XL = 0; 
+                XC = C_val > 0 ? Infinity : 0; 
+                
+                addCalculationStep(
+                    `1. Frecuencia Angular ($\omega$): $\\omega = 2 \\cdot \\pi \\cdot f = 2 \\cdot \\pi \\cdot 0$`, 
+                    `0.00`, `rad/s`
+                );
+
+                addCalculationStep(
+                    `2. Reactancia Inductiva ($X_L$): $X_L = \\omega \\cdot L$`, 
+                    `0.00`, `$\Omega$ (Corto)`
+                );
+
+                if (C_val > 0) {
+                     addCalculationStep(
+                        `3. Reactancia Capacitiva ($X_C$): $X_C = 1 / (\\omega \\cdot C)$`, 
+                        `Infinito`, `$\Omega$ (Abierto)`
+                    );
+                    Z = Infinity;
+                    I_max = 0;
+                    phi_deg = 0;
+
+                    addCalculationStep(`4. Impedancia (Z) y Corriente (I):`, `Z = Infinito, I = 0`, `A (Circuito abierto)`);
+                } else {
+                    addCalculationStep(
+                        `3. Reactancia Capacitiva ($X_C$): $X_C = 0$`, 
+                        `0.00`, `$\Omega$ (Sin efecto)`
+                    );
+                    Z = R_val;
+                    I_max = (R_val > 0) ? (V_max / R_val) : 0;
+                    phi_deg = 0;
+
+                    addCalculationStep(
+                        `4. Impedancia (Z) y Corriente ($I_{max}$): $Z = R$, $I_{max} = V_{max} / Z$`, 
+                        `${Z.toFixed(2)}`, `$\Omega$ y ${I_max.toFixed(2)} A`
+                    );
+                }
+
+                X_total = 0;
+
+            } else {
+                // 3. Cálculo en CA (AC)
+                
+                // 3.1. Frecuencia Angular
+                omega = 2 * Math.PI * f;
+                addCalculationStep(
+                    `1. Frecuencia Angular ($\omega$): $\\omega = 2 \\cdot \\pi \\cdot f$`, 
+                    `${omega.toFixed(2)}`, `rad/s`
+                );
+                
+                // 3.2. Reactancias
+                XL = (L_val > 0 && omega > 0) ? (omega * L_val) : 0;
+                XC = (C_val > 0 && omega > 0) ? (1 / (omega * C_val)) : Infinity; 
+                
+                addCalculationStep(
+                    `2. Reactancia Inductiva ($X_L$): $X_L = \\omega \\cdot L$`, 
+                    `${XL.toFixed(2)}`, `$\Omega$`
+                );
+                
+                const xcDisplay = XC === Infinity ? `Infinito` : `${XC.toFixed(2)}`;
+                 addCalculationStep(
+                    `3. Reactancia Capacitiva ($X_C$): $X_C = 1 / (\\omega \\cdot C)$`, 
+                    `${xcDisplay}`, `$\Omega$`
+                );
+
+                // 3.3. Reactancia Total 
+                X_total = (XC === Infinity) ? XL : (XL - XC);
+                
+                const xTotalDisplay = X_total.toFixed(2);
+                addCalculationStep(
+                    `4. Reactancia Total (X): $X = X_L - X_C$`, 
+                    `${xTotalDisplay}`, `$\Omega$`
+                );
+
+
+                // 3.4. Impedancia Total (Z)
+                if (XC === Infinity && R_val === 0 && XL === 0) { 
+                    Z = Infinity;
+                } else if (XC === Infinity) { 
+                    Z = Math.sqrt(R_val * R_val + XL * XL); 
+                } else {
+                    Z = Math.sqrt(R_val * R_val + X_total * X_total);
+                }
+                
+                const zDisplay = Z === Infinity ? 'Infinito' : Z.toFixed(2);
+                addCalculationStep(
+                    `5. Impedancia Total (Z): $Z = \\sqrt{ R^2 + X^2 }$`, 
+                    `${zDisplay}`, `$\Omega$`
+                );
+
+
+                // 3.5. Ángulo de Desfase (phi)
+                if (R_val > 0) {
+                    phi_rad = Math.atan(X_total / R_val);
+                } else if (X_total > 0 && X_total !== Infinity) { 
+                    phi_rad = Math.PI / 2; // +90 grados (Inductivo puro)
+                } else if (X_total < 0 && X_total !== -Infinity) { 
+                    phi_rad = -Math.PI / 2; // -90 grados (Capacitivo puro)
+                } else {
+                    phi_rad = 0;
+                }
+                phi_deg = phi_rad * (180 / Math.PI);
+                
+                addCalculationStep(
+                    `6. Ángulo de Desfase ($\phi$): $\\phi = arctan( \\frac{X}{R} )$`, 
+                    `${phi_deg.toFixed(2)}`, `°`
+                );
+                
+                
+                // 3.6. Corriente Máxima
+                I_max = (Z !== 0 && Z !== Infinity) ? (V_max / Z) : 0;
+
+                addCalculationStep(
+                    `7. Corriente Maxima ($I_{max}$): $I_{max} = V_{max} / Z$`, 
+                    `${I_max.toFixed(2)}`, `A`
+                );
+            }
+            
+            // Llama a la función para renderizar todas las matemáticas después de generar los pasos
+            renderAllMath();
+
+            // 4. Cálculos de Factor de Potencia y Actualización de Salida
+            let FP;
+            if (Math.abs(phi_deg) > 0.1 && !isDC) {
+                // Usamos el ángulo para calcular el FP
+                FP = Math.cos(phi_rad);
+            } else if (isDC || R_val > 0 && Math.abs(X_total) < 0.01) {
+                // Resistencia pura o CC
+                FP = 1.0;
+            } else {
+                FP = 0.0;
+            }
+
+            // 5. Actualizar interfaz de Resultados Clave
+            RLC_CALCS_OUTPUT.z.textContent = `${Z === Infinity ? 'Infinito' : Z.toFixed(2)} Ω`;
+            RLC_CALCS_OUTPUT.imax.textContent = `${I_max.toFixed(2)} A`;
+            RLC_CALCS_OUTPUT.phi.textContent = `${phi_deg.toFixed(2)} °`;
+            RLC_CALCS_OUTPUT.fp.textContent = `${FP.toFixed(3)}`;
+
+            // 6. Actualizar tipo de carga y notas
+            let powerTypeText = 'Tipo de carga: ';
+            if (isDC) {
+                 powerTypeText = C_val > 0 ? 'CC: Circuito Abierto por C' : 'CC: Carga Resistiva';
+                 RLC_CALCS_OUTPUT.type.classList.value = 'text-center text-sm mt-4 font-semibold text-blue-300';
+            } else if (Z === Infinity || I_max === 0) {
+                powerTypeText = 'CA: Sin Potencia Aparente (Z infinita)';
+                RLC_CALCS_OUTPUT.type.classList.value = 'text-center text-sm mt-4 font-semibold text-red-400';
+            } else if (Math.abs(phi_deg) < 1) {
+                powerTypeText += 'Resistiva Pura (R-L-C en Resonancia)';
+                RLC_CALCS_OUTPUT.type.classList.value = 'text-center text-sm mt-4 font-semibold text-yellow-300';
+            } else if (phi_deg > 0.1) {
+                powerTypeText += 'Inductiva (I retrasa a V)';
+                RLC_CALCS_OUTPUT.type.classList.value = 'text-center text-sm mt-4 font-semibold text-purple-300';
+            } else {
+                powerTypeText += 'Capacitiva (I adelanta a V)';
+                RLC_CALCS_OUTPUT.type.classList.value = 'text-center text-sm mt-4 font-semibold text-pink-300';
+            }
+            RLC_CALCS_OUTPUT.type.textContent = powerTypeText;
+
+            RLC_CALCS_OUTPUT.schematicNote.textContent = isDC 
+                ? 'Fuente CC: XL=0 (Corto), XC=∞ (Abierto) - Si C>0, I=0.'
+                : 'Fuente CA: Vmax es la amplitud de la onda de tensión.';
+
+            // 7. Dibujar Diagramas
+            drawCircuitSchematic(R_val, L_val, C_val, type, isDC);
+            drawImpedanceTriangle(R_val, X_total, Z, phi_rad, isDC); 
+        }
+        
+        /** Dibuja el Esquema del Circuito (R, L, C, Fuente) - DISEÑO VERTICAL */
+        function drawCircuitSchematic(R, L, C, type, isDC) {
+            const W = circuitSchematicCanvas.width;
+            const H = circuitSchematicCanvas.height;
+            csCtx.clearRect(0, 0, W, H);
+            
+            const sourceX = W * 0.25; 
+            const componentX = W * 0.75;
+            const Y_START = 20;
+            const Y_END = H - 20;
+            const SOURCE_RADIUS = 15;
+            const COMPONENT_WIDTH = 30;
+
+            const activeComponents = [];
+            if (R > 0) activeComponents.push({ type: 'R', val: R.toFixed(1) + ' Ω', color: R_COLOR });
+            if (L > 0) activeComponents.push({ type: 'L', val: L.toFixed(3) + ' H', color: V_COLOR });
+            if (C > 0) activeComponents.push({ type: 'C', val: C.toFixed(5) + ' F', color: I_COLOR });
+            
+            // Si no hay componentes activos, usar valores por defecto para mostrar el diagrama
+            const effectiveComponents = activeComponents.length > 0 ? activeComponents.length : 3;
+            
+            const totalComponentArea = Y_END - Y_START;
+            // Aseguramos un divisor > 0
+            const componentSpace = totalComponentArea / (effectiveComponents + 1);
+            let currentY = Y_START;
+
+            // 1. Dibujar el Lazo del Circuito
+            csCtx.strokeStyle = AXIS_COLOR;
+            csCtx.lineWidth = 2;
+            csCtx.beginPath();
+            csCtx.moveTo(sourceX, Y_START);
+            csCtx.lineTo(componentX, Y_START);
+            csCtx.lineTo(componentX, Y_END); 
+            csCtx.lineTo(sourceX, Y_END);
+            csCtx.stroke();
+            
+            // Línea de la fuente
+            csCtx.beginPath();
+            csCtx.moveTo(sourceX, Y_START + 2 * SOURCE_RADIUS);
+            csCtx.lineTo(sourceX, Y_END - 2 * SOURCE_RADIUS);
+            csCtx.stroke();
+
+            // 2. Dibujar la Fuente
+            const sourceY = Y_START + (Y_END - Y_START) / 2;
+            const sourceColor = isDC ? DC_COLOR : V_COLOR;
+            csCtx.strokeStyle = sourceColor;
+            csCtx.lineWidth = 3;
+
+            if (isDC) {
+                csCtx.beginPath();
+                csCtx.moveTo(sourceX - 5, sourceY - 10);
+                csCtx.lineTo(sourceX - 5, sourceY + 10);
+                csCtx.moveTo(sourceX + 5, sourceY - 5);
+                csCtx.lineTo(sourceX + 5, sourceY + 5);
+                csCtx.stroke();
+                
+                csCtx.fillStyle = sourceColor;
+                csCtx.font = '14px Inter';
+                csCtx.fillText('+', sourceX - 10, sourceY - 15);
+                csCtx.fillText('-', sourceX + 1, sourceY - 15);
+                csCtx.fillText('V', sourceX + 15, sourceY + 5);
+            } else {
+                csCtx.beginPath();
+                csCtx.arc(sourceX, sourceY, SOURCE_RADIUS, 0, 2 * Math.PI);
+                csCtx.stroke();
+                csCtx.beginPath();
+                csCtx.moveTo(sourceX - 10, sourceY);
+                csCtx.bezierCurveTo(sourceX - 5, sourceY - 8, sourceX + 5, sourceY - 8, sourceX + 10, sourceY);
+                csCtx.bezierCurveTo(sourceX + 15, sourceY + 8, sourceX + 5, sourceY + 8, sourceX, sourceY);
+                csCtx.stroke();
+                csCtx.fillStyle = sourceColor;
+                csCtx.font = '14px Inter';
+                csCtx.fillText('Vmax', sourceX + 18, sourceY + 5);
+            }
+
+            // 3. Dibujar Componentes
+            currentY = Y_START + componentSpace / 2; 
+
+            activeComponents.forEach((comp) => {
+                const COMPONENT_HEIGHT = componentSpace * 0.7; 
+                const startY = currentY - COMPONENT_HEIGHT / 2;
+                const endY = currentY + COMPONENT_HEIGHT / 2;
+                const midY = currentY;
+
+                csCtx.strokeStyle = comp.color;
+                csCtx.lineWidth = 3;
+                
+                if (comp.type === 'R') {
+                    const ZIG_W = COMPONENT_WIDTH / 2;
+                    csCtx.beginPath();
+                    csCtx.moveTo(componentX - ZIG_W, startY);
+                    csCtx.lineTo(componentX + ZIG_W, startY + COMPONENT_HEIGHT * 0.2);
+                    csCtx.lineTo(componentX - ZIG_W, startY + COMPONENT_HEIGHT * 0.4);
+                    csCtx.lineTo(componentX + ZIG_W, startY + COMPONENT_HEIGHT * 0.6);
+                    csCtx.lineTo(componentX - ZIG_W, startY + COMPONENT_HEIGHT * 0.8);
+                    csCtx.lineTo(componentX + ZIG_W, endY);
+                    csCtx.stroke();
+                } else if (comp.type === 'L') {
+                    csCtx.beginPath();
+                    csCtx.moveTo(componentX, startY);
+                    csCtx.lineTo(componentX, startY + 5);
+                    csCtx.arc(componentX, startY + 15, 5, Math.PI / 2, 2.5 * Math.PI, true);
+                    csCtx.arc(componentX, startY + 25, 5, Math.PI / 2, 2.5 * Math.PI, true);
+                    csCtx.arc(componentX, startY + 35, 5, Math.PI / 2, 2.5 * Math.PI, true);
+                    csCtx.moveTo(componentX, endY - 5);
+                    csCtx.lineTo(componentX, endY);
+                    csCtx.stroke();
+                } else if (comp.type === 'C') {
+                    csCtx.beginPath();
+                    csCtx.moveTo(componentX - 10, midY - 8);
+                    csCtx.lineTo(componentX + 10, midY - 8);
+                    csCtx.moveTo(componentX - 10, midY + 8);
+                    csCtx.lineTo(componentX + 10, midY + 8);
+                    csCtx.stroke();
+                }
+
+                csCtx.fillStyle = comp.color;
+                csCtx.font = 'bold 12px Inter';
+                csCtx.fillText(comp.type, componentX + 10, midY - 5);
+                csCtx.font = '10px Inter';
+                csCtx.fillText(comp.val, componentX + 10, midY + 8);
+
+                currentY += componentSpace;
+            });
+            
+            // 4. Dibujar la Corriente (I)
+            csCtx.strokeStyle = I_COLOR;
+            csCtx.lineWidth = 2;
+            csCtx.font = 'bold 16px Inter';
+            
+            const arrowY = Y_START - 5;
+            const arrowX = componentX - 10;
+            csCtx.beginPath();
+            csCtx.moveTo(arrowX - 10, arrowY);
+            csCtx.lineTo(arrowX + 20, arrowY);
+            csCtx.moveTo(arrowX + 15, arrowY - 5);
+            csCtx.lineTo(arrowX + 20, arrowY);
+            csCtx.lineTo(arrowX + 15, arrowY + 5);
+            csCtx.stroke();
+
+            csCtx.fillStyle = I_COLOR;
+            csCtx.fillText('I', arrowX - 25, arrowY + 5);
+        }
+
+        /** Dibuja el triángulo de Impedancias (R, X, Z) */
+        function drawImpedanceTriangle(R, X_total, Z, phi_rad, isDC) {
+            const W = impedanceTriangleCanvas.width;
+            const H = impedanceTriangleCanvas.height;
+            const CX = 20; // Separación del borde izquierdo
+            const CY = H - 20; // Separación del borde inferior
+            itCtx.clearRect(0, 0, W, H);
+            
+            if (isDC || Z === 0 || Z === Infinity || (R === 0 && X_total === 0)) {
+                 itCtx.fillStyle = TEXT_COLOR;
+                 itCtx.font = '14px Inter';
+                 itCtx.fillText('No se dibuja el triángulo de impedancias.', W/2 - 120, H/2);
+                 if (isDC) itCtx.fillText('(Corriente Continua)', W/2 - 70, H/2 + 20);
+                 else if (Z === Infinity) itCtx.fillText('(Z es infinita o nula)', W/2 - 70, H/2 + 20);
+                 return;
+            }
+
+            const R_val = R;
+            const X_val = X_total;
+            // Z_val = Z; // No se usa directamente
+
+            const MAX_SCALE_VAL = Math.max(R_val, Math.abs(X_val)) || 1;
+            const R_SCALE = W * 0.8 / MAX_SCALE_VAL; 
+
+            const r_scaled = R_val * R_SCALE;
+            const x_scaled = X_val * R_SCALE; 
+
+            const P1 = { x: CX, y: CY }; 
+            const P2 = { x: CX + r_scaled, y: CY }; 
+            const P3 = { x: CX + r_scaled, y: CY - x_scaled }; 
+            
+            // Ejes de referencia (R y X)
+            itCtx.strokeStyle = AXIS_COLOR;
+            itCtx.lineWidth = 2; // Más visible
+            itCtx.beginPath();
+            itCtx.moveTo(CX, 0); itCtx.lineTo(CX, H); 
+            itCtx.moveTo(0, CY); itCtx.lineTo(W, CY); 
+            itCtx.stroke();
+            itCtx.font = '12px Inter';
+            itCtx.fillStyle = TEXT_COLOR;
+            itCtx.fillText('R (Eje Real)', W - 70, CY - 5);
+            itCtx.fillText('X (Eje Im)', CX + 5, 15);
+            
+            // Dibujar Triángulo
+            
+            // 1. Resistencia (R)
+            itCtx.strokeStyle = R_COLOR;
+            itCtx.lineWidth = 4;
+            itCtx.beginPath();
+            itCtx.moveTo(P1.x, P1.y);
+            itCtx.lineTo(P2.x, P2.y);
+            itCtx.stroke();
+            itCtx.fillText('R', (P1.x + P2.x) / 2 - 5, P1.y + 15);
+
+            // 2. Reactancia Total (X)
+            itCtx.strokeStyle = I_COLOR;
+            itCtx.lineWidth = 4;
+            itCtx.beginPath();
+            itCtx.moveTo(P2.x, P2.y);
+            itCtx.lineTo(P3.x, P3.y);
+            itCtx.stroke();
+            itCtx.fillText('X', P2.x + 5, (P2.y + P3.y) / 2 + 5);
+
+
+            // 3. Impedancia (Z)
+            itCtx.strokeStyle = V_COLOR;
+            itCtx.lineWidth = 4;
+            itCtx.beginPath();
+            itCtx.moveTo(P1.x, P1.y);
+            itCtx.lineTo(P3.x, P3.y);
+            itCtx.stroke();
+            
+            const midZ = {x: (P1.x + P3.x) / 2, y: (P1.y + P3.y) / 2};
+            itCtx.fillText('Z', midZ.x + 5, midZ.y - 5);
+
+
+            // Ángulo Phi
+            if (Math.abs(phi_rad) > 0.01) {
+                const angle_radius = 25;
+                itCtx.strokeStyle = TEXT_COLOR;
+                itCtx.lineWidth = 1;
+                itCtx.beginPath();
+                
+                // phi_rad es negativo para ángulos capacitivos (abajo), positivo para inductivos (arriba)
+                // El arco va desde el eje real (0) hasta el ángulo de impedancia (-phi_rad)
+                itCtx.arc(P1.x, P1.y, angle_radius, 0, -phi_rad, phi_rad > 0); 
+                itCtx.stroke();
+
+                const phi_x = P1.x + (angle_radius + 15) * Math.cos(-phi_rad / 2);
+                const phi_y = P1.y - (angle_radius + 15) * Math.sin(-phi_rad / 2);
+                itCtx.fillStyle = TEXT_COLOR;
+                itCtx.font = 'bold 14px Inter';
+                itCtx.fillText('φ', phi_x - 5, phi_y + 5);
+            }
+        }
+        
+        // =========================================================================
+        // === INICIO AL CARGAR ===
+        // =========================================================================
+
+        window.onload = function() {
+            // 1. Inicializar Fasores
+            updatePhasorSettings(); 
+            
+            // 2. Inicializar RLC
+            // Aseguramos que el tamaño del canvas RLC esté definido ANTES del cálculo
+            impedanceTriangleCanvas.width = impedanceTriangleCanvas.parentElement.clientWidth;
+            circuitSchematicCanvas.width = circuitSchematicCanvas.parentElement.clientWidth;
+            
+            RLC_INPUTS.voltageType.dispatchEvent(new Event('change')); // Cargar fórmula inicial y renderizar
+            updateRLCInputs();
+        };
+
+    </script>
+</body>
+</html>

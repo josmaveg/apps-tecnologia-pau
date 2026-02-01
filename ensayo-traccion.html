@@ -11,4 +11,743 @@ Instagram: @_tecnologiaymas
 ================================================================================
 -->
 
-<!-- Aquí irá tu código HTML del Simulador de Ensayo de Tracción -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Ensayo de Traccion Dinámico</title>
+    <!-- Carga de Tailwind CSS para un diseño moderno y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Carga de KaTeX para renderizar símbolos griegos y fórmulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" xintegrity="sha384-GvrFXWzh7Q5rE+Gk06F2L/j0F4vN0w6B6kM2F0V1q8z8Z4/0k0T4t" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" xintegrity="sha384-wGfX0yuK4nUOFhI7kO/TjQY7m7s/4W/4W0t8/A3F0V1q8z8Z4/0k0T4t" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" xintegrity="sha384-wGfX0yuK4nUOFhI7kO/TjQY7m7s/4W/4W0t8/A3F0V1q8z8Z4/0k0T4t" crossorigin="anonymous"></script>
+    
+    <style>
+        /* Estilos generales y para el área de visualización */
+        .specimen-container {
+            height: 250px; /* Altura ajustada para el layout horizontal */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 10px 0;
+        }
+        .grip {
+            width: 40px;
+            height: 80px; /* Altura ajustada */
+            background-color: #374151;
+        }
+        .specimen-bar {
+            background-color: #9ca3af;
+            height: 20px;
+            transition: width 0.1s linear, transform 0.1s linear, height 0.1s linear;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .gauge-line {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 2px;
+            background-color: #10b981; 
+            width: 60%; 
+            left: 20%;
+            z-index: 20;
+        }
+        .gauge-tick {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 15px;
+            background-color: #10b981;
+        }
+        .tick-left { left: 20%; }
+        .tick-right { right: 20%; }
+        
+        /* Estilos para el canvas P-V */
+        #stressStrainCanvas {
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 6px;
+            width: 100%; /* Asegura que ocupe todo el ancho de su columna */
+        }
+        /* Estilo para los símbolos KaTeX inline */
+        .katex {
+            font-size: 1em; 
+            margin: 0 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8 font-sans">
+
+    <div class="container mx-auto max-w-7xl bg-white p-6 rounded-xl shadow-2xl">
+        <h1 class="text-3xl font-extrabold text-red-700 text-center mb-6">
+            Simulador: Ensayo de Tracción con Nomenclatura Estándar
+        </h1>
+        <p class="text-center mb-8 text-lg text-gray-600">
+            Simulación de la curva completa de Tensión $\sigma$ vs. Alargamiento Unitario $\varepsilon$ hasta la fractura.
+        </p>
+
+        <!-- N-3 COLUMN LAYOUT: CONTROLES | PROBETA | GRÁFICO -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            <!-- COLUMNA 1: CONTROLES Y RESULTADOS -->
+            <div class="bg-red-50 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-red-600 mb-4">Propiedades de Ensayo</h2>
+                
+                <!-- Longitud Inicial (L0) - AHORA EDITABLE -->
+                <label for="L0" class="block mb-2 text-sm font-medium text-gray-700">
+                    Longitud Inicial ($L_0$) en mm:
+                </label>
+                <input type="number" id="L0" value="100" min="50" step="10" class="w-full p-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 mb-4 shadow-sm">
+
+                <!-- Área Inicial (A0) - Editable -->
+                <label for="A0" class="block mb-2 text-sm font-medium text-gray-700">
+                    Área Inicial ($A_0$) en mm²:
+                </label>
+                <input type="number" id="A0" value="100" min="10" step="10" class="w-full p-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 mb-4 shadow-sm">
+
+                <!-- Módulo de Young (E) - Editable -->
+                <label for="E_modulus" class="block mb-2 text-sm font-medium text-gray-700">
+                    Módulo de Young ($E$) en GPa:
+                </label>
+                <input type="number" id="E_modulus" value="100" min="10" step="10" class="w-full p-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 mb-4 shadow-sm">
+
+                <!-- Límite Elástico (sigmaYield) - Editable -->
+                <label for="sigmaYield" class="block mb-2 text-sm font-medium text-gray-700">
+                    Límite Elástico ($\sigma_y$) en MPa:
+                </label>
+                <input type="number" id="sigmaYield" value="150" min="10" step="10" class="w-full p-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 mb-4 shadow-sm">
+
+                <!-- Tensión Máxima (sigmaUTS) - Editable -->
+                <label for="sigmaUTS" class="block mb-2 text-sm font-medium text-gray-700">
+                    Tensión Máxima ($\sigma_{UTS}$) en MPa:
+                </label>
+                <input type="number" id="sigmaUTS" value="250" min="10" step="10" class="w-full p-2 border border-red-300 rounded-md focus:ring-red-500 focus:border-red-500 mb-6 shadow-sm">
+                
+                <!-- Control Dinámico -->
+                <button id="toggleSimulation" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg mb-4">
+                    INICIAR ENSAYO (Aumenta Fuerza)
+                </button>
+
+                <div class="mt-4 p-4 bg-white rounded-md border border-gray-200" id="forceControlArea">
+                    <h3 class="font-bold text-gray-700 mb-2">Fuerza Aplicada ($F$) en kN:</h3>
+                    <input type="range" id="forceSlider" min="0" max="300" step="1" value="0" class="w-full" disabled>
+                    <p class="text-3xl text-red-600 font-extrabold mt-1 text-center" id="forceDisplay">0.00 kN</p>
+                </div>
+
+                <!-- Resultados Calculados -->
+                <div class="mt-6 p-4 bg-white rounded-md border border-gray-200">
+                    <h3 class="font-bold text-red-700 mb-2">Estado Actual</h3>
+                    <p class="text-sm font-medium mt-1">
+                        Tensión ($\sigma$): <span id="stressDisplay" class="font-bold text-indigo-600">-- MPa</span>
+                    </p>
+                    <p class="text-sm font-medium mt-1">
+                        Alargamiento Unitario ($\varepsilon$): <span id="strainDisplay" class="font-bold text-indigo-600">-- (%)</span>
+                    </p>
+                    <p class="text-sm font-medium mt-3 font-extrabold" id="materialStatus">
+                        Estado: <span class="text-green-600">Elástico</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- COLUMNA 2: VISUALIZACIÓN DE LA PROBETA -->
+            <div class="flex flex-col p-6 border border-gray-300 rounded-lg shadow-inner bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Visualización de la Probeta</h2>
+                
+                <!-- Visualización de la probeta -->
+                <div class="specimen-container">
+                    <!-- Grip Izquierdo Fijo -->
+                    <div class="grip"></div>
+                    <!-- Barra de la probeta que se estira -->
+                    <div id="specimenBar" class="specimen-bar">
+                        <!-- Línea de referencia L0 (Gauge Length) -->
+                        <div class="gauge-line"></div>
+                        <div class="gauge-tick tick-left"></div>
+                        <div class="gauge-tick tick-right"></div>
+                    </div>
+                    <!-- Grip Derecho que se mueve -->
+                    <div id="rightGrip" class="grip"></div>
+                </div>
+            </div>
+
+            <!-- COLUMNA 3: DIAGRAMA ESFUERZO-DEFORMACIÓN DINÁMICO -->
+            <div class="flex flex-col p-6 border border-gray-300 rounded-lg shadow-inner bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Curva Tensión $\sigma$ vs. Alargamiento Unitario $\varepsilon$</h2>
+                <canvas id="stressStrainCanvas" width="350" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- FÓRMULAS Y EXPLICACIÓN -->
+        <div class="mt-8 p-6 bg-indigo-50 rounded-xl border border-indigo-200">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Fórmulas y Puntos Clave</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                    <h3 class="font-bold text-lg text-indigo-600 mb-2">1. Tensión ($\sigma$)</h3>
+                    <p class="text-sm">Fuerza aplicada ($F$) por unidad de Área inicial ($A_0$).</p>
+                    <div class="mt-2 text-center text-xl font-mono p-2 bg-indigo-100 rounded-md">
+                        $$\sigma = \frac{F}{A_0}$$
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-indigo-600 mb-2">2. Alargamiento Unitario ($\varepsilon$)</h3>
+                    <p class="text-sm">Alargamiento total ($\Delta L$) dividido por Longitud inicial ($L_0$). Es adimensional.</p>
+                    <div class="mt-2 text-center text-xl font-mono p-2 bg-indigo-100 rounded-md">
+                        $$\varepsilon = \frac{\Delta L}{L_0}$$
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-indigo-600 mb-2">3. Límite Elástico ($\sigma_y$)</h3>
+                    <p class="text-sm">Tensión máxima ($\sigma$) que permite deformación elástica. En la zona elástica, la relación es lineal (Ley de Hooke).</p>
+                    <div class="mt-2 text-center text-xl font-mono p-2 bg-indigo-100 rounded-md">
+                        $$\sigma_y = E \cdot \varepsilon_y$$
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-indigo-600 mb-2">4. Tensión Máxima ($\sigma_{UTS}$)</h3>
+                    <p class="text-sm">Máxima Tensión ingenieril ($\sigma$) que soporta el material. Marca el inicio del **estriccionamiento (necking)**.</p>
+                    <div class="mt-2 text-center text-xl font-mono p-2 bg-indigo-100 rounded-md">
+                        $$\sigma_{UTS} = \frac{F_{max}}{A_0}$$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- INICIALIZACIÓN DE KATEX ---
+        function initializeKaTeX() {
+             // Asegura que KaTeX renderice las fórmulas matemáticas.
+             if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true}, 
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            } else {
+                console.warn("KaTeX auto-render script no está disponible.");
+            }
+        }
+
+        // Referencias a elementos del DOM
+        const L0Input = document.getElementById('L0');
+        const A0Input = document.getElementById('A0');
+        const EInput = document.getElementById('E_modulus');
+        const sigmaYieldInput = document.getElementById('sigmaYield');
+        const sigmaUTSInput = document.getElementById('sigmaUTS');
+        const forceSlider = document.getElementById('forceSlider');
+        const forceDisplay = document.getElementById('forceDisplay');
+        const stressDisplay = document.getElementById('stressDisplay');
+        const strainDisplay = document.getElementById('strainDisplay');
+        const toggleButton = document.getElementById('toggleSimulation');
+        const materialStatus = document.getElementById('materialStatus').querySelector('span');
+        const specimenBar = document.getElementById('specimenBar');
+        const rightGrip = document.getElementById('rightGrip');
+
+
+        // Canvas y contexto
+        const canvas = document.getElementById('stressStrainCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
+        // Variables de la simulación
+        let simulationInterval = null; 
+        const SPECIMEN_WIDTH_BASE = 300; // Ancho base visual de la probeta
+        const FORCE_STEP = 1.5; 
+        let currentMaxForce_KN = 300; 
+
+        let F_kN = 0; 
+        let isFractured = false;
+        
+        let currentStress = 0;
+        let currentStrain = 0;
+
+        // Máximo de Strain para el gráfico (ej. 30% = 0.3)
+        const MAX_STRAIN_PLOTTED = 0.30; 
+        
+        // --- LÓGICA DE CÁLCULO ---
+
+        /**
+         * Calcula el alargamiento unitario plástico basado en el modelo de endurecimiento lineal.
+         * @param {number} sigma Tensión actual (MPa).
+         * @param {number} sigmaYield Límite elástico (MPa).
+         * @param {number} sigmaUTS Tensión máxima (MPa).
+         * @param {number} E_MPa Módulo de Young (MPa).
+         * @returns {number} Deformación plástica.
+         */
+        function getPlasticStrain(sigma, sigmaYield, sigmaUTS, E_MPa) {
+            if (sigma < sigmaYield) {
+                return 0;
+            }
+
+            // Módulo de Endurecimiento (E_p): se asume una pendiente plástica
+            // Baja (ej. 1% del Módulo Elástico)
+            const E_plastic = E_MPa / 100; 
+            
+            const deltaSigma = sigma - sigmaYield;
+            
+            // Calculamos la deformación plástica con la pendiente E_plastic
+            const plasticStrain = deltaSigma / E_plastic;
+
+            // Evitamos que la deformación plástica exceda la deformación en UTS
+            const epsilonUTS_max = (sigmaUTS - sigmaYield) / E_plastic;
+
+            return Math.min(plasticStrain, epsilonUTS_max);
+        }
+
+        function actualizarCalculos() {
+            // 1. Obtener valores de entrada y hacer conversiones
+            const L0_mm = parseFloat(L0Input.value) || 100;
+            const A0_mm2 = parseFloat(A0Input.value) || 100;
+            const E_GPa = parseFloat(EInput.value) || 100;
+            const sigmaYield_MPa = parseFloat(sigmaYieldInput.value) || 150;
+            const sigmaUTS_MPa = parseFloat(sigmaUTSInput.value) || 250;
+            
+            // Leer la fuerza actual
+            F_kN = parseFloat(forceSlider.value);
+            const F_N = F_kN * 1000;
+
+            // Conversiones
+            const E_MPa = E_GPa * 1000;
+            
+            if (isFractured) return;
+
+            // 2. VALIDACIÓN INICIAL Y AJUSTE DE RANGO
+
+            if (A0_mm2 <= 0 || E_MPa <= 0 || L0_mm <= 0 || sigmaYield_MPa >= sigmaUTS_MPa) {
+                stressDisplay.textContent = strainDisplay.textContent = "Error en Parámetros";
+                drawStressStrainCurve(0, 0, E_MPa, sigmaYield_MPa, sigmaUTS_MPa);
+                return;
+            }
+            
+            // Establecer el rango máximo de la fuerza basado en UTS y Área
+            currentMaxForce_KN = (sigmaUTS_MPa * A0_mm2 / 1000) * 1.2; // 20% más que la F_UTS
+            forceSlider.max = currentMaxForce_KN.toFixed(0); 
+
+            // 3. CÁLCULOS DE TENSION Y DEFORMACION
+            
+            // a) Tensión (Sigma)
+            currentStress = F_N / A0_mm2; 
+
+            // b) Cálculo de la Deformación Plástica Máxima en UTS
+            const epsilonYield = sigmaYield_MPa / E_MPa;
+            const plasticStrainUTS = getPlasticStrain(sigmaUTS_MPa, sigmaYield_MPa, sigmaUTS_MPa, E_MPa);
+            const epsilonUTS = epsilonYield + plasticStrainUTS;
+
+            if (currentStress <= sigmaYield_MPa) {
+                // ZONA ELÁSTICA (Ley de Hooke)
+                currentStrain = currentStress / E_MPa;
+                materialStatus.textContent = "Elástico";
+                materialStatus.className = "text-green-600";
+                specimenBar.style.height = '20px'; // No hay estrechamiento
+                
+            } else if (currentStress <= sigmaUTS_MPa) {
+                // ZONA PLÁSTICA (Endurecimiento)
+                const elasticStrain = sigmaYield_MPa / E_MPa;
+                const plasticStrain = getPlasticStrain(currentStress, sigmaYield_MPa, sigmaUTS_MPa, E_MPa);
+                currentStrain = elasticStrain + plasticStrain;
+                materialStatus.textContent = "Plástico (Endurecimiento)";
+                materialStatus.className = "text-yellow-600";
+
+                // Estrechamiento visual gradual
+                const proximityToUTS = (currentStress - sigmaYield_MPa) / (sigmaUTS_MPa - sigmaYield_MPa);
+                specimenBar.style.height = `${20 - (proximityToUTS * 3)}px`; 
+
+            } else {
+                // RANGO DE ROTURA (Tensión Ingenieril > UTS)
+                
+                // Simulación de la caída de la tensión ingenieril post-UTS y aumento rápido de strain
+                currentStrain = epsilonUTS + (currentStress - sigmaUTS_MPa) / (E_MPa / 20);
+                
+                let stressDropFactor = (currentStrain - epsilonUTS) * 5; 
+                if (stressDropFactor > 0.4) stressDropFactor = 0.4; 
+                currentStress = sigmaUTS_MPa * (1 - stressDropFactor);
+
+
+                if (currentStrain > epsilonUTS + 0.07) { // Condición de rotura
+                     handleFracture();
+                }
+
+                specimenBar.style.height = '15px';
+                materialStatus.textContent = "Estricción / Rotura";
+                materialStatus.className = "text-red-700";
+            }
+            
+            // Si la fuerza actual es 0, restablecer el estado
+            if (F_kN === 0) {
+                 resetSimulationVisuals();
+                 return;
+            }
+
+            // 4. ACTUALIZAR DISPLAY
+            forceDisplay.textContent = `${F_kN.toFixed(2)} kN`;
+            stressDisplay.textContent = `${currentStress.toFixed(2)} MPa`; 
+            strainDisplay.textContent = `${(currentStrain * 100).toFixed(4)} %`; 
+
+            // 5. ACTUALIZAR VISUALIZACIÓN DE LA PROBETA
+
+            // El alargamiento total (Delta L) se calcula a partir del strain y L0
+            const deltaL_mm = currentStrain * L0_mm;
+            
+            // El factor visual del alargamiento es independiente de L0 para mantener la escala
+            const visualElongation = deltaL_mm * (SPECIMEN_WIDTH_BASE / L0_mm) * 3; // Escala visual: 3x
+
+            const finalWidth = SPECIMEN_WIDTH_BASE; // La longitud de la barra no cambia visualmente
+            const totalWidthChange = visualElongation;
+            
+            specimenBar.style.width = `${finalWidth}px`; 
+
+            // Se mueve el grip derecho según el alargamiento
+            const offset = totalWidthChange; // El desplazamiento es igual al alargamiento total
+            rightGrip.style.transform = `translateX(${offset}px)`;
+
+            // 6. DIBUJAR CURVA
+            drawStressStrainCurve(currentStress, currentStrain, E_MPa, sigmaYield_MPa, sigmaUTS_MPa, epsilonUTS);
+        }
+        
+        // --- VISUALIZACIÓN DE ROTURA ---
+        function handleFracture() {
+            pauseSimulation();
+            isFractured = true;
+            
+            const bar = document.getElementById('specimenBar');
+            const container = document.querySelector('.specimen-container');
+            const finalTranslation = parseFloat(rightGrip.style.transform.replace('translateX(', '').replace('px)', '')) || 0;
+            
+            // Ocultar la barra estirada
+            bar.style.opacity = 0;
+            
+            if (!document.getElementById('leftFragment')) {
+                // Regenerar el HTML de la probeta con los fragmentos
+                container.innerHTML = `
+                    <div class="grip"></div>
+                    <div id="leftFragment" class="specimen-bar" style="width: ${SPECIMEN_WIDTH_BASE/2}px; height: 15px; background-color: #9ca3af; position: absolute; left: 50%; transform: translateX(-${SPECIMEN_WIDTH_BASE/2 + 5}px); transition: transform 0.5s;"></div>
+                    <div id="rightFragment" class="specimen-bar" style="width: ${SPECIMEN_WIDTH_BASE/2}px; height: 15px; background-color: #9ca3af; position: absolute; left: 50%; transform: translateX(5px); transition: transform 0.5s;"></div>
+                    <div id="rightGrip" class="grip" style="transform: translateX(${finalTranslation}px); transition: transform 0.5s;"></div>
+                `;
+            }
+            
+            // Reasignar referencias DOM
+            window.specimenBar = document.getElementById('specimenBar');
+            window.rightGrip = document.getElementById('rightGrip');
+
+            // Animamos los fragmentos
+            setTimeout(() => {
+                // Separación post-rotura
+                document.getElementById('leftFragment').style.transform = `translateX(-${SPECIMEN_WIDTH_BASE/2 + 30}px)`; 
+                document.getElementById('rightFragment').style.transform = `translateX(40px)`;
+                rightGrip.style.transform = `translateX(${finalTranslation + 40}px)`;
+            }, 50);
+
+            materialStatus.textContent = "ROTURA FINALIZADA";
+            materialStatus.className = "text-red-900 font-bold";
+        }
+        
+        /**
+         * Restablece la simulación a su estado inicial (F=0).
+         */
+        function resetSimulationVisuals() {
+            pauseSimulation();
+            isFractured = false;
+            forceSlider.value = 0;
+
+            // Reestablecer la estructura HTML de la probeta
+             const container = document.querySelector('.specimen-container');
+             container.innerHTML = `
+                <div class="grip"></div>
+                <div id="specimenBar" class="specimen-bar">
+                    <div class="gauge-line"></div>
+                    <div class="gauge-tick tick-left"></div>
+                    <div class="gauge-tick tick-right"></div>
+                </div>
+                <div id="rightGrip" class="grip"></div>
+             `;
+             
+             // Reasignar referencias DOM
+             window.specimenBar = document.getElementById('specimenBar');
+             window.rightGrip = document.getElementById('rightGrip');
+
+
+            specimenBar.style.opacity = 1;
+            specimenBar.style.width = `${SPECIMEN_WIDTH_BASE}px`;
+            specimenBar.style.height = '20px';
+            specimenBar.style.transform = `translateX(0px)`;
+            rightGrip.style.transform = `translateX(0px)`;
+
+            // Resetear texto
+            materialStatus.textContent = "Elástico";
+            materialStatus.className = "text-green-600";
+
+            stressDisplay.textContent = `0.00 MPa`; 
+            strainDisplay.textContent = `0.0000 %`; 
+            forceDisplay.textContent = `0.00 kN`;
+            
+            // Redibujar el gráfico inicial
+            actualizarCalculos();
+        }
+
+
+        // --- LÓGICA DE DIBUJO DEL GRÁFICO ---
+
+        function drawAxis(MaxStress, MaxStrain) {
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1;
+
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Dibujar ejes
+            ctx.beginPath();
+            // Eje Épsilon (horizontal)
+            ctx.moveTo(30, canvasHeight - 30);
+            ctx.lineTo(canvasWidth - 10, canvasHeight - 30);
+            // Eje Sigma (vertical)
+            ctx.moveTo(30, canvasHeight - 30);
+            ctx.lineTo(30, 10);
+            ctx.stroke();
+
+            // Etiquetas de valores máximos
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#000000';
+            ctx.textAlign = 'right';
+            ctx.fillText(MaxStress.toFixed(0), 28, 20);
+            ctx.textAlign = 'center';
+            ctx.fillText((MaxStrain * 100).toFixed(0), canvasWidth - 10, canvasHeight - 15);
+            
+            // Etiquetas de los ejes
+            ctx.textAlign = 'center';
+            ctx.fillText('Alargamiento Unitario (ε, %)', canvasWidth / 2 + 15, canvasHeight - 5);
+            
+            ctx.textAlign = 'left';
+            ctx.save();
+            ctx.translate(15, canvasHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Tensión (σ, MPa)', 0, 0);
+            ctx.restore();
+        }
+
+        function drawStressStrainCurve(currentSigma, currentEpsilon, E_MPa, sigmaYield_MPa, sigmaUTS_MPa, epsilonUTS) {
+            
+            const MAX_STRESS_PLOTTED = sigmaUTS_MPa * 1.2;
+            
+            // Aseguramos que la deformación en UTS se calcule correctamente para el eje X
+            const epsilonYield = sigmaYield_MPa / E_MPa;
+            const plasticStrainUTS = getPlasticStrain(sigmaUTS_MPa, sigmaYield_MPa, sigmaUTS_MPa, E_MPa);
+            const effectiveEpsilonUTS = epsilonYield + plasticStrainUTS;
+
+            // La deformación de rotura se estima como ligeramente mayor a UTS
+            const effectiveEpsilonFracture = effectiveEpsilonUTS * 1.2;
+            
+            // Dibujar ejes, ajustando el MaxStrain al punto de rotura estimado
+            drawAxis(MAX_STRESS_PLOTTED, effectiveEpsilonFracture); 
+
+            // Funciones de mapeo
+            const mapX = (strain) => 30 + (strain / effectiveEpsilonFracture) * (canvasWidth - 40);
+            const mapY = (stress) => canvasHeight - 30 - (stress / MAX_STRESS_PLOTTED) * (canvasHeight - 40);
+
+            // Puntos clave de la curva (calculados)
+            const sigmaFracture = sigmaUTS_MPa * 0.8; 
+
+            // 1. DIBUJAR LA CURVA COMPLETA (referencia estática)
+            
+            // 1.1. Tramo Elástico (0 -> Yield)
+            ctx.beginPath();
+            ctx.moveTo(mapX(0), mapY(0));
+            ctx.lineTo(mapX(epsilonYield), mapY(sigmaYield_MPa));
+            ctx.strokeStyle = '#2563eb'; // Azul
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 1.2. Tramo Plástico (Yield -> UTS)
+            ctx.beginPath();
+            ctx.moveTo(mapX(epsilonYield), mapY(sigmaYield_MPa));
+            ctx.lineTo(mapX(effectiveEpsilonUTS), mapY(sigmaUTS_MPa));
+            ctx.strokeStyle = '#f59e0b'; // Naranja
+            ctx.stroke();
+
+            // 1.3. Tramo de Estricción (UTS -> Fracture)
+            ctx.beginPath();
+            ctx.moveTo(mapX(effectiveEpsilonUTS), mapY(sigmaUTS_MPa));
+            ctx.lineTo(mapX(effectiveEpsilonFracture), mapY(sigmaFracture));
+            ctx.strokeStyle = '#ef4444'; // Rojo
+            ctx.stroke();
+
+            // 2. RESALTAR EL PUNTO ACTUAL
+
+            let plotSigma = Math.min(currentSigma, MAX_STRESS_PLOTTED);
+            let plotEpsilon = Math.min(currentEpsilon, effectiveEpsilonFracture);
+            
+            let currentX = mapX(plotEpsilon);
+            let currentY = mapY(plotSigma);
+            
+            if (!isFractured) { // No dibujar líneas guía si está roto
+                // Dibujar línea guía
+                ctx.beginPath();
+                ctx.setLineDash([2, 2]);
+                ctx.strokeStyle = '#333333';
+                ctx.moveTo(30, currentY);
+                ctx.lineTo(currentX, currentY);
+                ctx.moveTo(currentX, canvasHeight - 30);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Dibujar el punto actual
+                ctx.beginPath();
+                ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#ef4444'; 
+                ctx.fill();
+
+                // Mostrar el valor del punto actual en el gráfico
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#000000';
+                
+                const textSigma = `σ: ${currentSigma.toFixed(1)} MPa`;
+                const textEpsilon = `ε: ${(currentEpsilon * 100).toFixed(2)} %`;
+
+                let textX = currentX + 8;
+                let textY = currentY - 5;
+                
+                if (currentX > canvasWidth - 100) {
+                    textX = currentX - 90;
+                    ctx.textAlign = 'right';
+                } else {
+                    ctx.textAlign = 'left';
+                }
+                if (currentY < 30) {
+                    textY = currentY + 20;
+                }
+
+                ctx.fillText(textSigma, textX, textY);
+                ctx.fillText(textEpsilon, textX, textY + 14);
+            }
+
+
+            // 3. ETIQUETAS DE PUNTOS CLAVE
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#10b981';
+            
+            // Etiqueta Límite Elástico (Yield)
+            ctx.fillText('σy', mapX(epsilonYield) - 2, mapY(sigmaYield_MPa) - 5);
+            ctx.beginPath();
+            ctx.arc(mapX(epsilonYield), mapY(sigmaYield_MPa), 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#10b981'; 
+            ctx.fill();
+
+            // Etiqueta Tensión Máxima (UTS)
+            ctx.fillText('σUTS', mapX(effectiveEpsilonUTS) + 15, mapY(sigmaUTS_MPa) + 2);
+            ctx.beginPath();
+            ctx.arc(mapX(effectiveEpsilonUTS), mapY(sigmaUTS_MPa), 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#10b981'; 
+            ctx.fill();
+        }
+
+        // --- LÓGICA DINÁMICA ---
+
+        function startSimulation() {
+            if (simulationInterval !== null) return;
+            if (isFractured) {
+                // Reiniciamos el estado antes de empezar
+                resetSimulationVisuals();
+            }
+
+            // Deshabilitar entrada de parámetros
+            L0Input.disabled = true;
+            A0Input.disabled = true;
+            EInput.disabled = true;
+            sigmaYieldInput.disabled = true;
+            sigmaUTSInput.disabled = true;
+
+            // Habilitar slider y establecer max
+            forceSlider.disabled = false;
+            forceSlider.max = currentMaxForce_KN.toFixed(0);
+
+            toggleButton.textContent = 'PAUSAR ENSAYO';
+            toggleButton.classList.replace('bg-green-600', 'bg-red-600');
+
+            simulationInterval = setInterval(() => {
+                let currentForce = parseFloat(forceSlider.value);
+                
+                currentForce += FORCE_STEP;
+                
+                // Si la fuerza calculada excede el límite del slider
+                if (currentForce >= parseFloat(forceSlider.max)) {
+                    currentForce = parseFloat(forceSlider.max);
+                    // Pausar al llegar al límite de la simulación
+                    pauseSimulation();
+                }
+                
+                forceSlider.value = currentForce;
+                actualizarCalculos();
+
+            }, 50); 
+        }
+
+        function pauseSimulation() {
+            clearInterval(simulationInterval);
+            simulationInterval = null;
+            
+            // Habilitar entrada manual (slider y parámetros)
+            forceSlider.disabled = false;
+            L0Input.disabled = false;
+            A0Input.disabled = false;
+            EInput.disabled = false;
+            sigmaYieldInput.disabled = false;
+            sigmaUTSInput.disabled = false;
+
+            toggleButton.textContent = 'REANUDAR ENSAYO';
+            toggleButton.classList.replace('bg-red-600', 'bg-green-600');
+        }
+
+        function toggleDynamicSimulation() {
+            if (isFractured) {
+                resetSimulationVisuals();
+                startSimulation();
+            } else if (simulationInterval === null) {
+                startSimulation();
+            } else {
+                pauseSimulation();
+            }
+        }
+
+        // Event Listeners
+        toggleButton.addEventListener('click', toggleDynamicSimulation);
+        
+        // Listener para el slider (si la simulación está pausada)
+        forceSlider.addEventListener('input', () => {
+            // Solo actualiza si no está en modo dinámico
+            if (simulationInterval === null && !isFractured) actualizarCalculos();
+        });
+        
+        // Listeners para inputs de parámetros (solo actualiza si está en pausa/reset)
+        const parameterInputs = [L0Input, A0Input, EInput, sigmaYieldInput, sigmaUTSInput];
+        parameterInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                if (simulationInterval === null) {
+                    resetSimulationVisuals(); // Reinicia al cambiar parámetros
+                }
+            });
+        });
+
+        // Inicialización principal
+        window.onload = () => {
+             // 1. Inicializar KaTeX
+             initializeKaTeX();
+             
+             // 2. Dibujar la curva inicial con fuerza cero
+             resetSimulationVisuals(); 
+        };
+    </script>
+</body>
+</html>

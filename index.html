@@ -1,293 +1,421 @@
 <!DOCTYPE html>
-<!--
-================================================================================
-Apps Tecnología e Ingeniería II - 2º Bachillerato
-Copyright © 2025 José Manuel Vega. Todos los derechos reservados.
-
-Este código está protegido por derechos de autor.
-Prohibida su copia, modificación o redistribución sin permiso expreso.
-
-Contacto: josmavega@gmail.com
-Instagram: @_tecnologiaymas
-================================================================================
--->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apps Tecnología e Ingeniería II - 2º Bachillerato</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .app-card { transition: all 0.3s ease; }
+        .app-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .hero-gradient { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); }
+
+        /* Modal */
+        #ia-modal { display: none; }
+        #ia-modal.open { display: flex; }
+        #ia-modal.open .modal-panel {
+            animation: slideUp 0.3s ease;
         }
-        
-        .app-card {
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        
-        .app-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            border-left-color: #3b82f6;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .badge-termo { background-color: #fee2e2; color: #991b1b; }
-        .badge-mecanica { background-color: #dbeafe; color: #1e40af; }
-        .badge-electrica { background-color: #fef3c7; color: #92400e; }
-        .badge-materiales { background-color: #d1fae5; color: #065f46; }
-        
-        .hero-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            font-size: 24px;
-            margin-bottom: 1rem;
-        }
+        .ia-inner-card { transition: all 0.3s ease; }
+        .ia-inner-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-slate-50 text-slate-900">
 
-    <!-- HEADER / HERO -->
-    <header class="hero-gradient text-white py-20 px-4">
-        <div class="max-w-5xl mx-auto text-center">
-            <h1 class="text-5xl font-extrabold mb-4">
-                Apps Interactivas de Tecnología e Ingeniería II
-            </h1>
-            <p class="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-                Herramientas educativas para estudiantes de 2º Bachillerato preparando la PAU
-            </p>
-            <div class="flex flex-wrap gap-3 justify-center text-sm">
-                <span class="badge bg-white text-purple-700">✓ Simuladores Interactivos</span>
-                <span class="badge bg-white text-purple-700">✓ Cálculos Paso a Paso</span>
-                <span class="badge bg-white text-purple-700">✓ Visualización Dinámica</span>
-                <span class="badge bg-white text-purple-700">✓ Gratis y Open Source</span>
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-18 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">T2</div>
+                <div>
+                    <h1 class="font-bold text-base leading-none">Apps Tecnología e Ingeniería II</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">2º Bachillerato · PAU CyL</p>
+                </div>
             </div>
+            <nav class="hidden md:flex gap-6 text-sm font-medium text-slate-600">
+                <a href="#apps" class="hover:text-indigo-600 transition">Aplicaciones</a>
+                <a href="#uso" class="hover:text-indigo-600 transition">Cómo usar</a>
+            </nav>
+            <a href="https://github.com/josmavega/apps-tecnologia-pau" target="_blank"
+               class="text-xs bg-slate-900 text-white px-4 py-2 rounded-full font-semibold hover:bg-slate-700 transition">
+                GitHub →
+            </a>
         </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-6xl mx-auto px-4 py-16">
-        
-        <!-- INTRODUCCIÓN -->
-        <section class="mb-16 text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">
-                Aprende Tecnología con Simulaciones Reales
+    <!-- Hero -->
+    <section class="hero-gradient text-white py-20 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <span class="inline-block bg-white/10 border border-white/20 text-white/80 text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6">
+                Tecnología e Ingeniería II · 2º Bachillerato
+            </span>
+            <h2 class="text-5xl font-extrabold mb-6 tracking-tight leading-tight">
+                Apps Interactivas de<br>Tecnología e Ingeniería II
             </h2>
-            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                Colección de aplicaciones web diseñadas específicamente para ayudarte a comprender 
-                los conceptos clave de Tecnología Industrial mediante visualización interactiva y 
-                cálculos detallados paso a paso.
+            <p class="text-lg text-indigo-200 max-w-2xl mx-auto mb-10">
+                Herramientas educativas para estudiantes de 2º Bachillerato preparando la PAU
             </p>
-        </section>
-
-        <!-- APPS GRID -->
-        <section>
-            <h3 class="text-2xl font-bold text-gray-800 mb-8 text-center">
-                Explora las Aplicaciones por Bloques
-            </h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                <!-- APP 1: MOTORES OTTO VS DIESEL -->
-                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='motores-otto-diesel.html'">
-                    <div class="feature-icon bg-red-100 text-red-600">
-                        🔥
-                    </div>
-                    <span class="badge badge-termo mb-3">TERMODINÁMICA</span>
-                    <h4 class="text-xl font-bold text-gray-800 mb-2">
-                        Comparador Motores Otto vs Diesel
-                    </h4>
-                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-                        Simulación completa de los 4 tiempos con animación visual del cilindro, 
-                        diagrama P-V teórico, y cálculo de eficiencia térmica según relación de compresión.
-                    </p>
-                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                        <span>• Animación de pistón</span>
-                        <span>• Ciclo termodinámico</span>
-                        <span>• Diagrama P-V</span>
-                    </div>
-                </article>
-
-                <!-- APP 2: ENSAYO DE TRACCIÓN -->
-                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='ensayo-traccion.html'">
-                    <div class="feature-icon bg-green-100 text-green-600">
-                        💪
-                    </div>
-                    <span class="badge badge-materiales mb-3">MATERIALES</span>
-                    <h4 class="text-xl font-bold text-gray-800 mb-2">
-                        Simulador de Ensayo de Tracción
-                    </h4>
-                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-                        Simulación dinámica del comportamiento mecánico de materiales bajo tracción. 
-                        Curva σ-ε completa hasta la fractura con visualización de la probeta deformándose.
-                    </p>
-                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                        <span>• Zona elástica y plástica</span>
-                        <span>• Estricción visual</span>
-                        <span>• Parámetros editables</span>
-                    </div>
-                </article>
-
-                <!-- APP 3: CORRIENTE ALTERNA (CA) -->
-                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='corriente-alterna.html'">
-                    <div class="feature-icon bg-yellow-100 text-yellow-600">
-                        ⚡
-                    </div>
-                    <span class="badge badge-electrica mb-3">ELECTRICIDAD</span>
-                    <h4 class="text-xl font-bold text-gray-800 mb-2">
-                        Simulador de Corriente Alterna y Circuitos RLC
-                    </h4>
-                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-                        Herramienta dual: visualización de fasores y ondas senoidales (mono/bi/trifásico), 
-                        más calculadora completa de circuitos RLC en serie con triángulo de impedancias.
-                    </p>
-                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                        <span>• Diagramas de Fresnel</span>
-                        <span>• Cálculo RLC paso a paso</span>
-                        <span>• CA y CC</span>
-                    </div>
-                </article>
-
-                <!-- APP 4: ANÁLISIS DE VIGAS -->
-                <article class="app-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="window.location.href='analisis-vigas.html'">
-                    <div class="feature-icon bg-blue-100 text-blue-600">
-                        🏗️
-                    </div>
-                    <span class="badge badge-mecanica mb-3">MECÁNICA</span>
-                    <h4 class="text-xl font-bold text-gray-800 mb-2">
-                        Calculadora de Diagramas de Vigas
-                    </h4>
-                    <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-                        Análisis estructural flexible de vigas simplemente apoyadas o en voladizo. 
-                        Cálculo de reacciones, diagramas de cortante (V) y momento flector (M).
-                    </p>
-                    <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                        <span>• Cargas puntuales y distribuidas</span>
-                        <span>• Diagramas V y M</span>
-                        <span>• Geometría adaptable</span>
-                    </div>
-                </article>
-
+            <div class="flex flex-wrap justify-center gap-3 text-sm">
+                <span class="bg-white/10 border border-white/20 px-4 py-2 rounded-full">✓ Simuladores Interactivos</span>
+                <span class="bg-white/10 border border-white/20 px-4 py-2 rounded-full">✓ Cálculos Paso a Paso</span>
+                <span class="bg-white/10 border border-white/20 px-4 py-2 rounded-full">✓ Visualización Dinámica</span>
+                <span class="bg-white/10 border border-white/20 px-4 py-2 rounded-full">✓ Gratis y Open Source</span>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- CARACTERÍSTICAS GENERALES -->
-        <section class="mt-20 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-10">
-            <h3 class="text-2xl font-bold text-gray-800 mb-8 text-center">
-                ¿Por qué usar estas aplicaciones?
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="text-4xl mb-3">🎯</div>
-                    <h4 class="font-bold text-gray-800 mb-2">Enfocadas en PAU</h4>
-                    <p class="text-sm text-gray-600">
-                        Diseñadas específicamente para los contenidos que realmente aparecen en Selectividad
-                    </p>
+    <main class="max-w-6xl mx-auto px-6 py-16">
+
+        <!-- Intro -->
+        <div class="text-center mb-14">
+            <h3 class="text-3xl font-extrabold mb-3">Aprende Tecnología con Simulaciones Reales</h3>
+            <p class="text-slate-600 max-w-2xl mx-auto">Colección de aplicaciones web diseñadas específicamente para ayudarte a comprender los conceptos clave de Tecnología Industrial mediante visualización interactiva y cálculos detallados paso a paso.</p>
+        </div>
+
+        <div id="apps" class="mb-6">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Explora las Aplicaciones por Bloques</h4>
+        </div>
+
+        <!-- Grid de tarjetas — todas al mismo nivel -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
+
+            <!-- Termodinámica -->
+            <div class="app-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                <div class="flex items-start gap-4 mb-5">
+                    <span class="bg-orange-100 text-orange-600 p-3 rounded-xl text-2xl">🔥</span>
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-orange-500">Termodinámica</span>
+                        <h5 class="font-bold text-lg mt-1 leading-snug">Comparador Motores Otto vs Diesel</h5>
+                    </div>
                 </div>
-                <div class="text-center">
-                    <div class="text-4xl mb-3">📊</div>
-                    <h4 class="font-bold text-gray-800 mb-2">Paso a Paso</h4>
-                    <p class="text-sm text-gray-600">
-                        Todos los cálculos explicados en detalle con fórmulas y razonamiento completo
-                    </p>
+                <p class="text-slate-600 text-sm mb-5">Simulación completa de los 4 tiempos con animación visual del cilindro, diagrama P-V teórico, y cálculo de eficiencia térmica según relación de compresión.</p>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Animación de pistón</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Ciclo termodinámico</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Diagrama P-V</span>
                 </div>
-                <div class="text-center">
-                    <div class="text-4xl mb-3">💻</div>
-                    <h4 class="font-bold text-gray-800 mb-2">Sin Instalación</h4>
-                    <p class="text-sm text-gray-600">
-                        Funcionan directamente en el navegador, sin descargas ni plugins necesarios
-                    </p>
-                </div>
+                <a href="otto-diesel/index.html" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">
+                    Abrir Simulador →
+                </a>
             </div>
-        </section>
 
-        <!-- RECOMENDACIONES DE USO -->
-        <section class="mt-16 bg-white rounded-xl shadow-lg p-8">
-            <h3 class="text-2xl font-bold text-gray-800 mb-6">
-                📚 Recomendaciones de Uso
-            </h3>
-            <div class="space-y-4">
-                <div class="flex items-start gap-3">
-                    <span class="text-2xl">1️⃣</span>
+            <!-- Materiales -->
+            <div class="app-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                <div class="flex items-start gap-4 mb-5">
+                    <span class="bg-sky-100 text-sky-600 p-3 rounded-xl text-2xl">💪</span>
                     <div>
-                        <h4 class="font-semibold text-gray-800">Primero la teoría</h4>
-                        <p class="text-sm text-gray-600">Revisa tus apuntes antes de usar los simuladores para entender los conceptos base</p>
+                        <span class="text-xs font-bold uppercase tracking-widest text-sky-500">Materiales</span>
+                        <h5 class="font-bold text-lg mt-1 leading-snug">Simulador de Ensayo de Tracción</h5>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-2xl">2️⃣</span>
+                <p class="text-slate-600 text-sm mb-5">Simulación dinámica del comportamiento mecánico de materiales bajo tracción. Curva σ-ε completa hasta la fractura con visualización de la probeta deformándose.</p>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Zona elástica y plástica</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Estricción visual</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Parámetros editables</span>
+                </div>
+                <a href="traccion/index.html" class="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">
+                    Abrir Simulador →
+                </a>
+            </div>
+
+            <!-- Electricidad -->
+            <div class="app-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                <div class="flex items-start gap-4 mb-5">
+                    <span class="bg-yellow-100 text-yellow-600 p-3 rounded-xl text-2xl">⚡</span>
                     <div>
-                        <h4 class="font-semibold text-gray-800">Experimenta con valores</h4>
-                        <p class="text-sm text-gray-600">Cambia los parámetros para ver cómo afectan a los resultados y entender las relaciones</p>
+                        <span class="text-xs font-bold uppercase tracking-widest text-yellow-600">Electricidad</span>
+                        <h5 class="font-bold text-lg mt-1 leading-snug">Simulador de Corriente Alterna y Circuitos RLC</h5>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-2xl">3️⃣</span>
+                <p class="text-slate-600 text-sm mb-5">Herramienta dual: visualización de fasores y ondas senoidales (mono/bi/trifásico), más calculadora completa de circuitos RLC en serie con triángulo de impedancias.</p>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Diagramas de Fresnel</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Cálculo RLC paso a paso</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">CA y CC</span>
+                </div>
+                <a href="rlc/index.html" class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">
+                    Abrir Simulador →
+                </a>
+            </div>
+
+            <!-- Mecánica -->
+            <div class="app-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                <div class="flex items-start gap-4 mb-5">
+                    <span class="bg-emerald-100 text-emerald-600 p-3 rounded-xl text-2xl">🏗️</span>
                     <div>
-                        <h4 class="font-semibold text-gray-800">Lee los pasos de cálculo</h4>
-                        <p class="text-sm text-gray-600">No te quedes solo con el resultado final, comprende el proceso completo</p>
+                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-600">Mecánica</span>
+                        <h5 class="font-bold text-lg mt-1 leading-snug">Calculadora de Diagramas de Vigas</h5>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-2xl">4️⃣</span>
+                <p class="text-slate-600 text-sm mb-5">Análisis estructural flexible de vigas simplemente apoyadas o en voladizo. Cálculo de reacciones, diagramas de cortante (V) y momento flector (M).</p>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Cargas puntuales y distribuidas</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Diagramas V y M</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">Geometría adaptable</span>
+                </div>
+                <a href="vigas/index.html" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">
+                    Abrir Simulador →
+                </a>
+            </div>
+
+            <!-- Inteligencia Artificial — misma estructura que las demás -->
+            <div class="app-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                <div class="flex items-start gap-4 mb-5">
+                    <span class="bg-indigo-100 text-indigo-600 p-3 rounded-xl text-2xl">🤖</span>
                     <div>
-                        <h4 class="font-semibold text-gray-800">Practica ejercicios reales</h4>
-                        <p class="text-sm text-gray-600">Usa las apps para verificar tus cálculos de problemas de exámenes anteriores</p>
+                        <span class="text-xs font-bold uppercase tracking-widest text-indigo-500">Inteligencia Artificial</span>
+                        <h5 class="font-bold text-lg mt-1 leading-snug">Los 4 Pilares de la IA en la Ingeniería</h5>
                     </div>
+                </div>
+                <p class="text-slate-600 text-sm mb-5">Guía completa de apuntes para la PAU. Conceptos técnicos y aplicaciones reales de PLN, Visión Artificial, Aprendizaje Supervisado y Sistemas Expertos.</p>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">💬 PLN</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">👁️ Visión Artificial</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">🧠 Aprendizaje Supervisado</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full">🎓 Sistemas Expertos</span>
+                </div>
+                <button onclick="abrirIA()" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">
+                    Ver Apuntes →
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Por qué usar estas apps -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-10 mb-16 shadow-sm">
+            <h4 class="text-xl font-bold text-center mb-8">¿Por qué usar estas aplicaciones?</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl mx-auto mb-3">🎯</div>
+                    <h5 class="font-bold mb-1">Enfocadas en PAU</h5>
+                    <p class="text-sm text-slate-600">Diseñadas específicamente para los contenidos que realmente aparecen en Selectividad</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl mx-auto mb-3">📊</div>
+                    <h5 class="font-bold mb-1">Paso a Paso</h5>
+                    <p class="text-sm text-slate-600">Todos los cálculos explicados en detalle con fórmulas y razonamiento completo</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl mx-auto mb-3">💻</div>
+                    <h5 class="font-bold mb-1">Sin Instalación</h5>
+                    <p class="text-sm text-slate-600">Funcionan directamente en el navegador, sin descargas ni plugins necesarios</p>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <!-- Recomendaciones -->
+        <div id="uso" class="mb-16">
+            <h4 class="text-xl font-bold text-center mb-8">📚 Recomendaciones de Uso</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-sm mb-3">1</div>
+                    <h5 class="font-bold text-sm mb-1">Primero la teoría</h5>
+                    <p class="text-xs text-slate-600">Revisa tus apuntes antes de usar los simuladores para entender los conceptos base</p>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-sm mb-3">2</div>
+                    <h5 class="font-bold text-sm mb-1">Experimenta con valores</h5>
+                    <p class="text-xs text-slate-600">Cambia los parámetros para ver cómo afectan a los resultados y entender las relaciones</p>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-sm mb-3">3</div>
+                    <h5 class="font-bold text-sm mb-1">Lee los pasos de cálculo</h5>
+                    <p class="text-xs text-slate-600">No te quedes solo con el resultado final, comprende el proceso completo</p>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-sm mb-3">4</div>
+                    <h5 class="font-bold text-sm mb-1">Practica ejercicios reales</h5>
+                    <p class="text-xs text-slate-600">Usa las apps para verificar tus cálculos de problemas de exámenes anteriores</p>
+                </div>
+            </div>
+        </div>
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-gray-800 text-gray-300 py-12 px-4 mt-20">
-        <div class="max-w-5xl mx-auto text-center">
-            <h3 class="text-xl font-bold text-white mb-4">
-                Apps Tecnología Industrial 2º Bach
-            </h3>
-            <p class="text-sm mb-6 max-w-2xl mx-auto">
-                Proyecto educativo creado por José Manuel Vega, profesor de Tecnología, 
-                para ayudar a estudiantes de 2º Bachillerato a preparar la PAU.
-            </p>
-            <div class="flex justify-center gap-6 text-sm">
-                <a href="https://github.com/josmavega/apps-tecnologia-pau" target="_blank" class="hover:text-white transition">
-                    📁 Repositorio GitHub
-                </a>
-                <span>|</span>
-                <a href="mailto:josmavega@gmail.com" class="hover:text-white transition">
-                    ✉️ josmavega@gmail.com
-                </a>
-                <span>|</span>
-                <a href="https://instagram.com/_tecnologiaymas" target="_blank" class="hover:text-white transition">
-                    📱 @_tecnologiaymas
-                </a>
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-14">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm mx-auto mb-4">T2</div>
+            <p class="font-semibold text-white mb-1">Apps Tecnología Industrial 2º Bach</p>
+            <p class="text-sm mb-4">Proyecto educativo creado por José Manuel Vega, profesor de Tecnología,<br>para ayudar a estudiantes de 2º Bachillerato a preparar la PAU.</p>
+            <div class="flex justify-center gap-6 text-sm mb-6">
+                <a href="https://github.com/josmavega/apps-tecnologia-pau" class="hover:text-white transition">📁 Repositorio GitHub</a>
+                <a href="mailto:josmavega@gmail.com" class="hover:text-white transition">✉️ josmavega@gmail.com</a>
+                <a href="https://instagram.com/_tecnologiaymas" class="hover:text-white transition">📱 @_tecnologiaymas</a>
             </div>
-            <div class="mt-8 pt-8 border-t border-gray-700 text-xs text-gray-400">
-                © 2025 José Manuel Vega - Todos los derechos reservados | 
-                Uso educativo personal permitido | Prohibida la redistribución sin permiso
-            </div>
+            <p class="text-xs text-slate-600">© 2025 José Manuel Vega · Uso educativo personal permitido · Prohibida la redistribución sin permiso</p>
         </div>
     </footer>
+
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- MODAL: Apuntes de Inteligencia Artificial        -->
+    <!-- ════════════════════════════════════════════════ -->
+    <div id="ia-modal" class="fixed inset-0 z-[100] items-start justify-center bg-black/50 overflow-y-auto py-10 px-4">
+        <div class="modal-panel bg-slate-50 rounded-3xl w-full max-w-4xl mx-auto shadow-2xl">
+
+            <!-- Cabecera -->
+            <div class="flex items-center justify-between px-8 py-6 border-b border-slate-200 bg-white rounded-t-3xl">
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-100 text-indigo-600 p-2 rounded-xl text-xl">🤖</span>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-indigo-500">Inteligencia Artificial · Apuntes PAU</p>
+                        <h2 class="font-extrabold text-xl leading-none">Los 4 Pilares de la IA en la Ingeniería</h2>
+                    </div>
+                </div>
+                <button onclick="cerrarIA()" class="text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl p-2 transition text-2xl leading-none" aria-label="Cerrar">✕</button>
+            </div>
+
+            <!-- Contenido -->
+            <div class="px-8 py-10 space-y-8">
+
+                <!-- 1. PLN -->
+                <div class="ia-inner-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-4 mb-5">
+                        <span class="bg-amber-100 text-amber-700 p-3 rounded-2xl text-2xl">💬</span>
+                        <h3 class="text-2xl font-bold">1. Procesamiento de Lenguaje Natural (PLN)</h3>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="bg-slate-50 p-5 rounded-2xl">
+                            <h4 class="font-bold text-indigo-900 mb-2">Concepto Clave PAU:</h4>
+                            <p class="text-sm text-slate-700">Rama de la IA centrada en la interacción entre computadoras y lenguajes humanos. Su objetivo es que las máquinas puedan <strong>entender, interpretar y generar</strong> lenguaje de forma natural y contextual.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2 text-sm">Funcionamiento Técnico:</h4>
+                            <ul class="list-disc ml-5 space-y-1 text-sm text-slate-700">
+                                <li><strong>Tokenización:</strong> Dividir el texto en unidades (palabras/frases).</li>
+                                <li><strong>Análisis Semántico:</strong> Entender el significado real más allá de la gramática.</li>
+                                <li><strong>Generación de Lenguaje (NLG):</strong> Producir respuestas coherentes basadas en modelos estadísticos y de atención (Transformers).</li>
+                            </ul>
+                        </div>
+                        <div class="border-t border-slate-100 pt-5">
+                            <h4 class="font-bold text-amber-700 mb-2 text-sm">Aplicación Recomendada: Chatbots y Traductores</h4>
+                            <p class="text-sm text-slate-700">Los modelos tipo <strong>GPT (Generative Pre-trained Transformer)</strong> utilizan redes neuronales profundas para predecir la siguiente palabra en una secuencia, permitiendo una asistencia técnica fluida o la traducción instantánea manteniendo el contexto regional del idioma.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Visión Artificial -->
+                <div class="ia-inner-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-4 mb-5">
+                        <span class="bg-blue-100 text-blue-700 p-3 rounded-2xl text-2xl">👁️</span>
+                        <h3 class="text-2xl font-bold">2. Visión Artificial</h3>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="bg-slate-50 p-5 rounded-2xl">
+                            <h4 class="font-bold text-indigo-900 mb-2">Concepto Clave PAU:</h4>
+                            <p class="text-sm text-slate-700">Capacidad de los sistemas digitales para obtener información significativa a partir de <strong>imágenes digitales, videos u otras entradas visuales</strong>, actuando o realizando recomendaciones basadas en esa información.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2 text-sm">Fases de la Visión Artificial:</h4>
+                            <ol class="list-decimal ml-5 space-y-1 text-sm text-slate-700">
+                                <li><strong>Adquisición:</strong> Captura de la imagen (sensores CMOS/CCD).</li>
+                                <li><strong>Preprocesamiento:</strong> Eliminación de ruido y ajuste de contraste.</li>
+                                <li><strong>Segmentación:</strong> Aislar los objetos de interés del fondo.</li>
+                                <li><strong>Reconocimiento:</strong> Clasificación del objeto mediante patrones aprendidos.</li>
+                            </ol>
+                        </div>
+                        <div class="border-t border-slate-100 pt-5">
+                            <h4 class="font-bold text-blue-700 mb-2 text-sm">Aplicación Recomendada: Control de Calidad e Ingeniería</h4>
+                            <p class="text-sm text-slate-700">En fábricas automovilísticas, cámaras de alta velocidad analizan cada pieza producida comparándola con un modelo ideal de CAD. Si detectan una grieta de micras, el sistema expulsa la pieza automáticamente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Aprendizaje Supervisado -->
+                <div class="ia-inner-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-4 mb-5">
+                        <span class="bg-green-100 text-green-700 p-3 rounded-2xl text-2xl">🧠</span>
+                        <h3 class="text-2xl font-bold">3. Aprendizaje Supervisado</h3>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="bg-slate-50 p-5 rounded-2xl">
+                            <h4 class="font-bold text-indigo-900 mb-2">Concepto Clave PAU:</h4>
+                            <p class="text-sm text-slate-700">Subcategoría del Machine Learning que se basa en entrenar al algoritmo con un <strong>conjunto de datos etiquetados</strong> (entrada conocida y salida deseada). El modelo aprende a mapear entradas a salidas.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 border border-slate-100 rounded-xl">
+                                <h5 class="font-bold text-xs uppercase text-slate-500 mb-2">Entrenamiento</h5>
+                                <p class="text-sm text-slate-700">Se le dan 10.000 fotos de tornillos indicando cuáles son "buenos" y cuáles "malos".</p>
+                            </div>
+                            <div class="p-4 border border-slate-100 rounded-xl">
+                                <h5 class="font-bold text-xs uppercase text-slate-500 mb-2">Predicción</h5>
+                                <p class="text-sm text-slate-700">Se le da una foto nueva y el sistema predice con un % de confianza si es bueno o malo.</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-100 pt-5">
+                            <h4 class="font-bold text-green-700 mb-2 text-sm">Aplicación Recomendada: Diagnóstico Médico por Imagen</h4>
+                            <p class="text-sm text-slate-700">Sistemas que analizan radiografías o resonancias para detectar tumores precoces. Han sido entrenados con millones de imágenes diagnosticadas por médicos humanos, logrando precisiones superiores en detección temprana.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Sistemas Expertos -->
+                <div class="ia-inner-card bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-4 mb-5">
+                        <span class="bg-purple-100 text-purple-700 p-3 rounded-2xl text-2xl">🎓</span>
+                        <h3 class="text-2xl font-bold">4. Sistemas Expertos</h3>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="bg-slate-50 p-5 rounded-2xl">
+                            <h4 class="font-bold text-indigo-900 mb-2">Concepto Clave PAU:</h4>
+                            <p class="text-sm text-slate-700">Sistemas informáticos que emulan la capacidad de <strong>toma de decisiones de un experto humano</strong>. No aprenden solos (como el ML), sino que utilizan reglas lógicas (SI... ENTONCES...) predefinidas por especialistas.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2 text-sm">Componentes Esenciales:</h4>
+                            <ul class="list-disc ml-5 space-y-1 text-sm text-slate-700">
+                                <li><strong>Base de Conocimientos:</strong> Hechos y reglas sobre el área específica.</li>
+                                <li><strong>Motor de Inferencia:</strong> El "cerebro" que aplica las reglas a los hechos conocidos para deducir respuestas.</li>
+                                <li><strong>Interfaz de Usuario:</strong> Para interactuar con el no-experto.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t border-slate-100 pt-5">
+                            <h4 class="font-bold text-purple-700 mb-2 text-sm">Aplicación Recomendada: Triaje Médico o Asesoría Técnica</h4>
+                            <p class="text-sm text-slate-700">Sistemas de soporte a la decisión clínica que guían a un enfermero en urgencias para clasificar la gravedad de un paciente basándose en síntomas, siguiendo protocolos exactos que seguiría un médico especialista.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Pie del modal -->
+            <div class="px-8 py-5 border-t border-slate-200 bg-white rounded-b-3xl flex justify-end">
+                <button onclick="cerrarIA()" class="bg-slate-900 hover:bg-slate-700 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition">
+                    Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function abrirIA() {
+            const modal = document.getElementById('ia-modal');
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function cerrarIA() {
+            const modal = document.getElementById('ia-modal');
+            modal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        // Cerrar al pulsar fuera del panel
+        document.getElementById('ia-modal').addEventListener('click', function(e) {
+            if (e.target === this) cerrarIA();
+        });
+        // Cerrar con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') cerrarIA();
+        });
+    </script>
 
 </body>
 </html>

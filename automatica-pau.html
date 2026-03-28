@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automática PAU · Castilla y León</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1c2030;--border:#2a2f3f;--accent:#4fd1c5;--accent2:#f6ad55;--accent3:#fc8181;--text:#e2e8f0;--muted:#718096;--result-bg:#0a1628;--purple:#9f7aea;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,209,197,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,209,197,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.container{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px;}
+header{border-bottom:1px solid var(--border);padding:20px 0;background:rgba(13,15,20,.96);position:sticky;top:0;z-index:200;backdrop-filter:blur(12px);}
+header .container{display:flex;align-items:center;gap:16px;}
+.logo{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;border:1px solid var(--accent);padding:4px 10px;border-radius:2px;}
+header h1{font-size:18px;font-weight:800;letter-spacing:-.02em;}
+header h1 span{color:var(--accent);}
+.hero{padding:40px 0 24px;text-align:center;}
+.hero h2{font-size:clamp(24px,4vw,40px);font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:12px;}
+.hero h2 em{font-style:normal;color:var(--accent);}
+.hero p{color:var(--muted);font-size:14px;max-width:520px;margin:0 auto;line-height:1.6;}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;margin:24px 0;}
+.tab{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:5px;transition:all .2s;letter-spacing:.02em;}
+.tab.active{background:var(--accent);color:#000;}
+.tab:hover:not(.active){color:var(--text);background:var(--border);}
+.panel{display:none;}.panel.active{display:block;}
+.sec-title{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:20px;}
+.btn{background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;padding:10px 22px;border:none;border-radius:6px;cursor:pointer;letter-spacing:.04em;transition:all .2s;}
+.btn:hover{background:#81e6d9;transform:translateY(-1px);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'Syne',sans-serif;font-weight:600;font-size:12px;padding:8px 16px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:transparent;border:1px solid rgba(252,129,129,.4);color:var(--accent3);font-family:'Syne',sans-serif;font-weight:600;font-size:12px;padding:8px 16px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.btn-danger:hover{background:rgba(252,129,129,.1);}
+.result-box{background:var(--result-bg);border:1px solid var(--accent);border-radius:8px;padding:20px 24px;margin-top:4px;display:none;}
+.result-box.show{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.result-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;}
+.result-formula{font-family:'Space Mono',monospace;font-size:18px;color:#fff;background:rgba(79,209,197,.07);display:inline-block;padding:10px 20px;border-radius:6px;border-left:3px solid var(--accent);margin-bottom:16px;word-break:break-all;}
+.step{font-size:12px;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);line-height:1.7;font-family:'Space Mono',monospace;}
+.step:last-child{border-bottom:none;}
+
+/* ══ EDITOR VISUAL ══ */
+#tab-editor{padding-bottom:40px;}
+.editor-layout{display:grid;grid-template-columns:190px 1fr;gap:14px;height:500px;}
+.palette{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:7px;overflow-y:auto;}
+.palette-title{font-size:10px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px;}
+.palette-item{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;cursor:grab;user-select:none;transition:all .18s;text-align:center;}
+.palette-item:hover{border-color:var(--accent);background:rgba(79,209,197,.08);transform:translateX(3px);}
+.palette-item:active{cursor:grabbing;}
+.pi-icon{font-size:18px;display:block;margin-bottom:2px;}
+.pi-name{font-size:12px;font-weight:700;display:block;}
+.pi-hint{font-size:9px;color:var(--muted);display:block;font-family:'Space Mono',monospace;}
+.canvas-wrap{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+#editorCanvas{width:100%;height:100%;cursor:default;display:block;}
+.canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;transition:opacity .3s;}
+.canvas-hint p{font-size:13px;color:var(--muted);}
+.canvas-hint .big{font-size:30px;margin-bottom:8px;opacity:.4;}
+.editor-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.editor-toolbar .spacer{flex:1;}
+#editorStatus{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+#labelEditor{position:fixed;z-index:999;display:none;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--accent);border-radius:8px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.6);}
+#labelEditor input{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'Space Mono',monospace;font-size:14px;padding:8px 12px;border-radius:5px;width:160px;}
+#labelEditor input:focus{outline:none;border-color:var(--accent);}
+#labelEditor .led-title{font-size:10px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;}
+#labelEditor .led-btns{display:flex;gap:6px;margin-top:4px;}
+#connTooltip{position:fixed;z-index:998;background:var(--surface);border:1px solid var(--accent2);border-radius:5px;padding:6px 12px;font-size:11px;font-family:'Space Mono',monospace;color:var(--accent2);pointer-events:none;display:none;}
+.btn-eraser{background:transparent;border:1px solid rgba(246,173,85,.4);color:var(--accent2);font-family:'Syne',sans-serif;font-weight:700;font-size:12px;padding:8px 16px;border-radius:6px;cursor:pointer;transition:all .2s;letter-spacing:.03em;}
+.btn-eraser:hover{background:rgba(246,173,85,.1);}
+.btn-eraser.active{background:rgba(246,173,85,.18);border-color:var(--accent2);box-shadow:0 0 10px rgba(246,173,85,.3);}
+.eraser-hint{font-size:10px;font-family:'Space Mono',monospace;color:var(--accent2);display:none;padding:5px 12px;background:rgba(246,173,85,.08);border:1px solid rgba(246,173,85,.2);border-radius:5px;}
+.eraser-hint.show{display:inline-block;}
+.steps-accordion{margin-top:16px;}
+.step-item{border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden;}
+.step-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);cursor:pointer;user-select:none;transition:background .2s;}
+.step-header:hover{background:var(--border);}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-title{font-size:13px;font-weight:700;flex:1;}
+.step-arr{color:var(--muted);font-size:12px;transition:transform .2s;}
+.step-body{padding:12px 16px;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);line-height:1.8;display:none;background:var(--bg);white-space:pre-wrap;}
+.step-body.open{display:block;}
+
+/* Calculadora */
+.topology-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;margin-bottom:24px;}
+.topo-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 12px;cursor:pointer;text-align:left;transition:all .2s;color:var(--text);font-family:'Syne',sans-serif;}
+.topo-btn:hover{border-color:var(--accent);background:rgba(79,209,197,.06);}
+.topo-btn.selected{border-color:var(--accent);background:rgba(79,209,197,.1);}
+.topo-btn .tn{font-size:10px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.1em;display:block;margin-bottom:6px;}
+.topo-btn .tt{font-size:13px;font-weight:700;display:block;margin-bottom:4px;}
+.topo-btn .tf{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+.diagram-area{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;min-height:120px;display:flex;align-items:center;justify-content:center;overflow-x:auto;}
+.inputs-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-group label{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;}
+.input-group input{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'Space Mono',monospace;font-size:14px;padding:10px 14px;border-radius:6px;width:130px;transition:border-color .2s;}
+.input-group input:focus{outline:none;border-color:var(--accent);}
+.ref-table{width:100%;border-collapse:collapse;font-size:13px;}
+.ref-table th{font-size:10px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);}
+.ref-table td{padding:10px 12px;border-bottom:1px solid rgba(42,47,63,.5);vertical-align:middle;}
+.ref-table tr:hover td{background:rgba(79,209,197,.04);}
+.ref-table .fc{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent2);}
+.badge{display:inline-block;font-size:10px;font-family:'Space Mono',monospace;letter-spacing:.08em;padding:2px 8px;border-radius:3px;background:rgba(79,209,197,.15);color:var(--accent);border:1px solid rgba(79,209,197,.3);}
+.pau-dw{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;margin-bottom:20px;}
+@media(max-width:700px){.editor-layout{grid-template-columns:1fr;height:auto;}.canvas-wrap{height:360px;}.palette{flex-direction:row;flex-wrap:wrap;height:auto;}.palette-item{flex:1;min-width:75px;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <span class="logo">PAU · CyL</span>
+    <h1>Automática · <span>Funciones de Transferencia</span></h1>
+  </div>
+</header>
+<div class="container">
+  <div class="hero">
+    <h2>Resuelve diagramas de bloques<br><em>paso a paso</em></h2>
+    <p>Herramienta para calcular funciones de transferencia Z/X. Selectividad de Castilla y León.</p>
+  </div>
+  <div class="tabs">
+    <button class="tab" onclick="switchTab('calculadora',this)">Calculadora</button>
+    <button class="tab active" onclick="switchTab('editor',this)">✦ Editor Visual</button>
+    <button class="tab" onclick="switchTab('pau',this)">Problema PAU</button>
+    <button class="tab" onclick="switchTab('referencia',this)">Formulario</button>
+  </div>
+
+  <!-- ══ EDITOR VISUAL ══ -->
+  <div class="panel active" id="tab-editor">
+    <div class="sec-title">Editor visual · arrastra y conecta bloques</div>
+    <div class="editor-toolbar">
+      <button class="btn-ghost" onclick="editorUndo()">↩ Deshacer</button>
+      <button class="btn-ghost" onclick="deleteSelected()">🗑 Seleccionado</button>
+      <button class="btn-eraser" id="btnEraser" onclick="toggleEraser()">✂ Borrador</button>
+      <button class="btn-danger" onclick="editorClear()">✕ Limpiar</button>
+      <span class="spacer"></span>
+      <span class="eraser-hint" id="eraserHint">Clic en bloque o línea para borrar · ESC para salir</span>
+      <span id="editorStatus"></span>
+      <button class="btn" onclick="solveEditor()">Calcular Z/X →</button>
+    </div>
+    <div class="editor-layout">
+      <div class="palette">
+        <div class="palette-title">Componentes</div>
+        <div class="palette-item" draggable="true" data-type="block" ondragstart="paletteDrag(event,'block')">
+          <span class="pi-icon">▭</span><span class="pi-name">Bloque</span><span class="pi-hint">P(s) / G(s)</span>
+        </div>
+        <div class="palette-item" draggable="true" data-type="comparator_neg" ondragstart="paletteDrag(event,'comparator_neg')">
+          <span class="pi-icon">⊗</span><span class="pi-name">Comp. Neg.</span><span class="pi-hint">Resta (−)</span>
+        </div>
+        <div class="palette-item" draggable="true" data-type="comparator_pos" ondragstart="paletteDrag(event,'comparator_pos')">
+          <span class="pi-icon">⊕</span><span class="pi-name">Comp. Pos.</span><span class="pi-hint">Suma (+)</span>
+        </div>
+        <div class="palette-item" draggable="true" data-type="input" ondragstart="paletteDrag(event,'input')">
+          <span class="pi-icon">→</span><span class="pi-name">Entrada</span><span class="pi-hint">X / R(s)</span>
+        </div>
+        <div class="palette-item" draggable="true" data-type="output" ondragstart="paletteDrag(event,'output')">
+          <span class="pi-icon">◎</span><span class="pi-name">Salida</span><span class="pi-hint">Z / Y(s)</span>
+        </div>
+        <div class="palette-item" draggable="true" data-type="junction" ondragstart="paletteDrag(event,'junction')">
+          <span class="pi-icon">⬤</span><span class="pi-name">Bifurcación</span><span class="pi-hint">Divide señal</span>
+        </div>
+        <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+        <div class="palette-title" style="margin-top:2px;">Cómo usar</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.8;font-family:'Space Mono',monospace;padding:2px 0;">
+          1. Arrastra piezas<br>
+          2. <b style="color:var(--accent)">⬤ Bifurcación</b>: divide una señal en varias ramas<br>
+          3. Doble-clic → edita etiqueta<br>
+          4. Clic en puerto ○ → conecta<br>
+          5. ✂ Borrador → borra bloque o línea<br>
+          6. ESC sale del borrador
+        </div>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap" ondragover="event.preventDefault()" ondrop="canvasDrop(event)">
+        <canvas id="editorCanvas"></canvas>
+        <div class="canvas-hint" id="canvasHint">
+          <div class="big">⬡</div>
+          <p>Arrastra componentes aquí<br>para construir tu diagrama</p>
+        </div>
+      </div>
+    </div>
+    <div id="labelEditor">
+      <div class="led-title">Editar etiqueta</div>
+      <input type="text" id="labelInput" placeholder="Ej: G1(s)" />
+      <div class="led-btns">
+        <button class="btn" style="font-size:11px;padding:7px 14px;" onclick="commitLabel()">OK</button>
+        <button class="btn-ghost" style="font-size:11px;" onclick="closeLabelEditor()">Cancelar</button>
+      </div>
+    </div>
+    <div id="connTooltip"></div>
+    <div class="result-box" id="resultEditor" style="margin-top:16px;">
+      <div class="result-label">Función de transferencia · Z/X</div>
+      <div class="result-formula" id="formulaEditor"></div>
+      <div class="steps-accordion" id="stepsEditor"></div>
+    </div>
+  </div>
+
+  <!-- ══ CALCULADORA ══ -->
+  <div class="panel" id="tab-calculadora">
+    <div class="sec-title">01 · Selecciona la topología</div>
+    <div class="topology-grid" id="topoGrid"></div>
+    <div class="sec-title">02 · Introduce los bloques</div>
+    <div class="card">
+      <div class="diagram-area" id="diagramArea"><span style="color:var(--muted);font-size:13px">← Selecciona una topología arriba</span></div>
+      <div class="inputs-row" id="inputsRow"></div>
+      <button class="btn" onclick="solve()">Calcular Z/X →</button>
+    </div>
+    <div class="result-box" id="resultBox">
+      <div class="result-label">Función de transferencia</div>
+      <div class="result-formula" id="resultFormula"></div>
+      <div id="resultSteps"></div>
+    </div>
+  </div>
+
+  <!-- ══ PAU ══ -->
+  <div class="panel" id="tab-pau">
+    <div class="sec-title">Problema tipo PAU · Castilla y León</div>
+    <div class="card">
+      <p style="font-size:14px;line-height:1.7;margin-bottom:18px"><strong>Enunciado:</strong> Calcular la función de transferencia <code style="color:var(--accent)">Y(s)/R(s)</code> del sistema de control cuyo diagrama de bloques se muestra. <span class="badge" style="margin-left:8px">1,5 ptos.</span></p>
+      <div class="pau-dw">
+        <svg viewBox="0 0 600 200" width="600" height="200" font-family="Space Mono,monospace">
+          <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4a5568"/></marker></defs>
+          <circle cx="80" cy="100" r="20" fill="#2a1f3d" stroke="#9f7aea" stroke-width="1.5"/>
+          <text x="80" y="105" text-anchor="middle" fill="#9f7aea" font-size="16">⊗</text>
+          <text x="68" y="90" fill="#4fd1c5" font-size="9">+</text><text x="68" y="116" fill="#fc8181" font-size="9">−</text>
+          <line x1="100" y1="100" x2="140" y2="100" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="140" y1="100" x2="140" y2="55" stroke="#4a5568" stroke-width="1.5"/>
+          <line x1="140" y1="55" x2="200" y2="55" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <rect x="200" y="38" width="90" height="34" rx="4" fill="#1e2d4a" stroke="#4fd1c5" stroke-width="1.5"/>
+          <text x="245" y="59" text-anchor="middle" fill="#e2e8f0" font-size="13">G₂(s)</text>
+          <line x1="290" y1="55" x2="370" y2="55" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="370" y1="55" x2="370" y2="100" stroke="#4a5568" stroke-width="1.5"/>
+          <line x1="100" y1="100" x2="200" y2="100" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <rect x="200" y="83" width="90" height="34" rx="4" fill="#1e2d4a" stroke="#4fd1c5" stroke-width="1.5"/>
+          <text x="245" y="104" text-anchor="middle" fill="#e2e8f0" font-size="13">G₁(s)</text>
+          <line x1="290" y1="100" x2="350" y2="100" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <circle cx="370" cy="100" r="18" fill="#2a1f3d" stroke="#9f7aea" stroke-width="1.5"/>
+          <text x="370" y="105" text-anchor="middle" fill="#9f7aea" font-size="16">⊕</text>
+          <text x="358" y="95" fill="#4fd1c5" font-size="9">+</text><text x="358" y="112" fill="#4fd1c5" font-size="9">+</text>
+          <line x1="388" y1="100" x2="500" y2="100" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="505" y="104" fill="#e2e8f0" font-size="13">Y(s)</text>
+          <line x1="470" y1="100" x2="470" y2="155" stroke="#4a5568" stroke-width="1.5"/>
+          <line x1="470" y1="155" x2="245" y2="155" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <rect x="200" y="138" width="90" height="34" rx="4" fill="#1e2d4a" stroke="#f6ad55" stroke-width="1.5"/>
+          <text x="245" y="159" text-anchor="middle" fill="#e2e8f0" font-size="13">H₁(s)</text>
+          <line x1="200" y1="155" x2="80" y2="155" stroke="#4a5568" stroke-width="1.5"/>
+          <line x1="80" y1="155" x2="80" y2="120" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="10" y="104" fill="#e2e8f0" font-size="13">R(s)</text>
+          <line x1="38" y1="100" x2="58" y2="100" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arr)"/>
+        </svg>
+      </div>
+      <button class="btn" onclick="solvePAU()">Resolver paso a paso →</button>
+    </div>
+    <div class="result-box" id="resultPAU">
+      <div class="result-label">Solución · Y(s)/R(s)</div>
+      <div class="result-formula" id="formulaPAU"></div>
+      <div class="steps-accordion" id="stepsPAU"></div>
+    </div>
+  </div>
+
+  <!-- ══ REFERENCIA ══ -->
+  <div class="panel" id="tab-referencia">
+    <div class="sec-title">Formulario de sistemas básicos</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="ref-table">
+        <thead><tr><th>#</th><th>Nombre</th><th>Condición</th><th>Z / X</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Bloques en serie</td><td>P₁, P₂, P₃ en serie</td><td class="fc">P₁·P₂·P₃</td></tr>
+          <tr><td>2</td><td>Bloques en paralelo</td><td>P₁, P₂ paralelo</td><td class="fc">P₁ + P₂</td></tr>
+          <tr><td>3</td><td>Realiment. negativa directa</td><td>1 bloque, H=1</td><td class="fc">P / (1 + P)</td></tr>
+          <tr><td>4</td><td>Realiment. negativa</td><td>P₁ adelante, P₂ retorno</td><td class="fc">P₁ / (1 + P₁·P₂)</td></tr>
+          <tr><td>5</td><td>Realiment. positiva directa</td><td>1 bloque, H=1</td><td class="fc">P / (1 − P)</td></tr>
+          <tr><td>6</td><td>Realiment. positiva</td><td>P₁ adelante, P₂ retorno</td><td class="fc">P₁ / (1 − P₁·P₂)</td></tr>
+          <tr><td>7</td><td>Realiment. neg. retorno</td><td>P en retorno</td><td class="fc">1 / (1 + P)</td></tr>
+          <tr><td>8</td><td>Realiment. pos. retorno</td><td>P en retorno</td><td class="fc">1 / (1 − P)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════ -->
+<script>
+/* -- EDITOR ENGINE ------------------------------------------- */
+const canvas = document.getElementById('editorCanvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvasWrap');
+
+let nodes = [], edges = [], nextId = 1;
+let dragging = null, connecting = null, selectedNode = null, selectedEdge = null;
+let eraserMode = false;
+let history = [], mousePos = {x:0,y:0}, dragType = null;
+
+const CFG = {
+  block:          {w:90,  h:36, color:'#4fd1c5', fill:'#1e2d4a', def:'P(s)'},
+  comparator_neg: {w:40,  h:40, color:'#9f7aea', fill:'#2a1f3d', def:'−'},
+  comparator_pos: {w:40,  h:40, color:'#9f7aea', fill:'#2a1f3d', def:'+'},
+  input:          {w:54,  h:30, color:'#718096', fill:'#1a1f2e', def:'X'},
+  output:         {w:54,  h:30, color:'#718096', fill:'#1a1f2e', def:'Z'},
+  junction:       {w:12,  h:12, color:'#4fd1c5', fill:'#4fd1c5', def:'·'},
+};
+
+function resizeCanvas() {
+  const r = wrap.getBoundingClientRect();
+  canvas.width  = r.width;
+  canvas.height = r.height;
+  draw();
+}
+window.addEventListener('resize', resizeCanvas);
+setTimeout(resizeCanvas, 80);
+
+/* -- Ports -- */
+function getPorts(n) {
+  const {x,y,w,h,type} = n;
+  const cx=x+w/2, cy=y+h/2;
+  if (type==='comparator_neg'||type==='comparator_pos') return [
+    {id:'in_l', x, y:cy, role:'in'},
+    {id:'in_t', x:cx, y, role:'in'},
+    {id:'out',  x:x+w, y:cy, role:'out'},
+  ];
+  if (type==='input')  return [{id:'out', x:x+w, y:cy, role:'out'}];
+  if (type==='output') return [{id:'in',  x, y:cy, role:'in'}];
+  if (type==='junction') return [
+    {id:'in',    x:x,    y:cy,   role:'in'},
+    {id:'out_r', x:x+w,  y:cy,   role:'out'},
+    {id:'out_t', x:cx,   y:y,    role:'out'},
+    {id:'out_b', x:cx,   y:y+h,  role:'out'},
+  ];
+  return [{id:'in', x, y:cy, role:'in'},{id:'out', x:x+w, y:cy, role:'out'}];
+}
+function findPort(px,py) {
+  for (const n of nodes)
+    for (const p of getPorts(n)) {
+      const dx=px-p.x, dy=py-p.y;
+      if (dx*dx+dy*dy<121) return {node:n,port:p};
+    }
+  return null;
+}
+function hitNode(px,py){
+  for(let i=nodes.length-1;i>=0;i--){
+    const n=nodes[i];
+    if(n.type==='junction'){
+      const cx=n.x+n.w/2, cy=n.y+n.h/2, r=n.w/2+4;
+      if(Math.hypot(px-cx,py-cy)<r) return n;
+    } else {
+      if(px>=n.x&&px<=n.x+n.w&&py>=n.y&&py<=n.y+n.h)return n;
+    }
+  }
+  return null;
+}
+
+/* -- Draw -- */
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // grid
+  ctx.strokeStyle='rgba(79,209,197,0.04)'; ctx.lineWidth=1;
+  for(let x=0;x<canvas.width;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+  for(let y=0;y<canvas.height;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+  // edges
+  for(const e of edges) {
+    const fn=nodes.find(n=>n.id===e.from), tn=nodes.find(n=>n.id===e.to);
+    if(!fn||!tn) continue;
+    const fp=getPorts(fn).find(p=>p.id===e.fromPort), tp=getPorts(tn).find(p=>p.id===e.toPort);
+    if(!fp||!tp) continue;
+    const isSel = selectedEdge===e;
+    const isHover = eraserMode && hoveredEdge===e;
+    const color = isSel||isHover ? '#fc8181' : '#4a5568';
+    const width = isSel||isHover ? 3 : 1.8;
+    drawArrow(fp.x,fp.y,tp.x,tp.y,color,false,width);
+  }
+  // live connection
+  if(connecting) {
+    const fp=getPorts(connecting.node).find(p=>p.id===connecting.port.id);
+    if(fp) drawArrow(fp.x,fp.y,mousePos.x,mousePos.y,'rgba(79,209,197,.5)',true,1.5);
+  }
+  // nodes
+  for(const n of nodes) drawNode(n);
+  document.getElementById('canvasHint').style.opacity = nodes.length===0?'1':'0';
+}
+
+function drawArrow(x1,y1,x2,y2,color='#4a5568',dashed=false,lw=1.8) {
+  // Orthogonal routing: go horizontal first, then vertical, then horizontal
+  ctx.save();
+  ctx.strokeStyle=color; ctx.lineWidth=lw;
+  ctx.setLineDash(dashed?[5,4]:[]);
+  ctx.lineJoin='round';
+  ctx.beginPath();
+  const mx=(x1+x2)/2;
+  ctx.moveTo(x1,y1);
+  if(Math.abs(y2-y1)<4){
+    // same row — straight line
+    ctx.lineTo(x2,y2);
+  } else {
+    // elbow: H → V → H
+    ctx.lineTo(mx,y1);
+    ctx.lineTo(mx,y2);
+    ctx.lineTo(x2,y2);
+  }
+  ctx.stroke();
+  // arrowhead
+  const ang = Math.abs(y2-y1)<4 ? (x2>x1?0:Math.PI) : (y2>y1?Math.PI/2:-Math.PI/2);
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-9*Math.cos(ang-.4),y2-9*Math.sin(ang-.4));
+  ctx.lineTo(x2-9*Math.cos(ang+.4),y2-9*Math.sin(ang+.4));
+  ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+  ctx.restore();
+}
+
+function drawNode(n) {
+  const {x,y,w,h,type,label,id}=n;
+  const cfg=CFG[type], isComp=type.startsWith('comparator');
+  const isSel = selectedNode?.id===id;
+  const isEraserHover = eraserMode && hoveredNode?.id===id;
+  ctx.save();
+  if(isEraserHover){ctx.shadowColor='#fc8181';ctx.shadowBlur=18;}
+  else if(isSel){ctx.shadowColor=cfg.color;ctx.shadowBlur=14;}
+
+  if(type==='junction'){
+    const cx=x+w/2, cy=y+h/2, r=6;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle=isEraserHover?'#fc8181':'#4fd1c5'; ctx.fill();
+    if(isSel){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}
+    ctx.shadowBlur=0;
+    // draw port dots only on hover / non-junction ports
+    for(const p of getPorts(n)){
+      if(p.id==='in') continue; // skip visual clutter for input port
+      ctx.shadowBlur=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2);
+      ctx.fillStyle='rgba(79,209,197,.5)'; ctx.fill();
+    }
+  } else if(isComp) {
+    const cx=x+w/2, cy=y+h/2, r=h/2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle=cfg.fill; ctx.fill();
+    ctx.strokeStyle=isEraserHover?'#fc8181':isSel?'#fff':cfg.color; ctx.lineWidth=isEraserHover||isSel?2.5:1.8; ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.font='bold 17px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#e2e8f0'; ctx.fillText(type==='comparator_neg'?'⊗':'⊕',cx,cy);
+    ctx.font='10px Space Mono,monospace';
+    ctx.fillStyle='#4fd1c5'; ctx.fillText('+',x+5,y+12);
+    ctx.fillStyle=type==='comparator_neg'?'#fc8181':'#4fd1c5';
+    ctx.fillText(type==='comparator_neg'?'−':'+',x+5,y+h-6);
+  } else {
+    rr(ctx,x,y,w,h,5); ctx.fillStyle=cfg.fill; ctx.fill();
+    ctx.strokeStyle=isEraserHover?'#fc8181':isSel?'#fff':cfg.color; ctx.lineWidth=isEraserHover||isSel?2.5:1.8; ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.font='bold 13px Space Mono,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#e2e8f0'; ctx.fillText(label||cfg.def,x+w/2,y+h/2);
+  }
+  // ports (skip for junction — shown above)
+  if(type!=='junction'){
+    for(const p of getPorts(n)) {
+      ctx.shadowBlur=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2);
+      ctx.fillStyle=p.role==='out'?'#4fd1c5':'#9f7aea'; ctx.fill();
+      ctx.strokeStyle='#0d0f14'; ctx.lineWidth=1.5; ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+function hitNode(px,py){for(let i=nodes.length-1;i>=0;i--){const n=nodes[i];if(px>=n.x&&px<=n.x+n.w&&py>=n.y&&py<=n.y+n.h)return n;}return null;}
+function canvasXY(e){const r=canvas.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};}
+
+/* -- Edge hit detection (orthogonal segments) -- */
+function ptOnSegment(px,py,ax,ay,bx,by,thr=8){
+  const dx=bx-ax,dy=by-ay,len2=dx*dx+dy*dy;
+  if(len2===0)return Math.hypot(px-ax,py-ay)<thr;
+  let t=((px-ax)*dx+(py-ay)*dy)/len2;
+  t=Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(ax+t*dx),py-(ay+t*dy))<thr;
+}
+function edgeSegments(fp,tp){
+  const x1=fp.x,y1=fp.y,x2=tp.x,y2=tp.y;
+  if(Math.abs(y2-y1)<4) return [[x1,y1,x2,y2]];
+  const mx=(x1+x2)/2;
+  return [[x1,y1,mx,y1],[mx,y1,mx,y2],[mx,y2,x2,y2]];
+}
+function ptOnBezier(px,py,x1,y1,x2,y2,threshold=10){
+  // kept name for compatibility, now checks orthogonal segments
+  const segs=edgeSegments({x:x1,y:y1},{x:x2,y:y2});
+  return segs.some(([ax,ay,bx,by])=>ptOnSegment(px,py,ax,ay,bx,by,threshold));
+}
+function findEdge(px,py){
+  for(const e of edges){
+    const fn=nodes.find(n=>n.id===e.from),tn=nodes.find(n=>n.id===e.to);
+    if(!fn||!tn)continue;
+    const fp=getPorts(fn).find(p=>p.id===e.fromPort),tp=getPorts(tn).find(p=>p.id===e.toPort);
+    if(fp&&tp&&ptOnBezier(px,py,fp.x,fp.y,tp.x,tp.y))return e;
+  }
+  return null;
+}
+
+/* -- Eraser -- */
+let hoveredNode=null, hoveredEdge=null;
+function toggleEraser(){
+  eraserMode=!eraserMode;
+  document.getElementById('btnEraser').classList.toggle('active',eraserMode);
+  document.getElementById('eraserHint').classList.toggle('show',eraserMode);
+  if(eraserMode){connecting=null;dragging=null;selectedNode=null;}
+  canvas.style.cursor=eraserMode?'crosshair':'default';
+  draw();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&eraserMode)toggleEraser();});
+
+/* -- Mouse -- */
+canvas.addEventListener('mousedown',e=>{
+  const {x,y}=canvasXY(e);
+  if(eraserMode){
+    const n=hitNode(x,y);
+    if(n){saveHistory();const id=n.id;nodes=nodes.filter(nd=>nd.id!==id);edges=edges.filter(ed=>ed.from!==id&&ed.to!==id);hoveredNode=null;draw();return;}
+    const ed=findEdge(x,y);
+    if(ed){saveHistory();edges=edges.filter(ex=>ex!==ed);hoveredEdge=null;draw();return;}
+    return;
+  }
+  const ph=findPort(x,y);
+  if(ph){saveHistory();connecting={node:ph.node,port:ph.port};return;}
+  const n=hitNode(x,y);
+  selectedNode=n||null;
+  if(n){saveHistory();dragging={node:n,ox:x-n.x,oy:y-n.y};nodes=[...nodes.filter(nd=>nd!==n),n];}
+  draw();
+});
+canvas.addEventListener('mousemove',e=>{
+  const {x,y}=canvasXY(e);
+  mousePos={x,y};
+  if(eraserMode){
+    hoveredNode=hitNode(x,y);
+    hoveredEdge=hoveredNode?null:findEdge(x,y);
+    canvas.style.cursor=(hoveredNode||hoveredEdge)?'crosshair':'crosshair';
+    draw();
+    return;
+  }
+  if(dragging){dragging.node.x=x-dragging.ox;dragging.node.y=y-dragging.oy;draw();}
+  else if(connecting){draw();const ph=findPort(x,y);const tip=document.getElementById('connTooltip');if(ph&&ph.node!==connecting.node){tip.style.display='block';tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY-28)+'px';tip.textContent=`→ "${ph.node.label||ph.node.type}" [${ph.port.id}]`;}else tip.style.display='none';}
+  const ph2=findPort(x,y); canvas.style.cursor=ph2?'crosshair':hitNode(x,y)?'grab':'default';
+});
+canvas.addEventListener('mouseup',e=>{
+  const {x,y}=canvasXY(e);
+  if(connecting){
+    const ph=findPort(x,y);
+    if(ph&&ph.node!==connecting.node){
+      let from,fp,to,tp;
+      if(connecting.port.role==='out'&&ph.port.role==='in'){from=connecting.node.id;fp=connecting.port.id;to=ph.node.id;tp=ph.port.id;}
+      else if(connecting.port.role==='in'&&ph.port.role==='out'){from=ph.node.id;fp=ph.port.id;to=connecting.node.id;tp=connecting.port.id;}
+      else{from=connecting.node.id;fp=connecting.port.id;to=ph.node.id;tp=ph.port.id;}
+      if(!edges.some(e=>e.from===from&&e.fromPort===fp&&e.to===to&&e.toPort===tp))
+        edges.push({from,fromPort:fp,to,toPort:tp});
+    }
+    connecting=null; document.getElementById('connTooltip').style.display='none'; draw();
+  }
+  dragging=null; canvas.style.cursor='default';
+});
+canvas.addEventListener('dblclick',e=>{
+  const {x,y}=canvasXY(e); const n=hitNode(x,y);
+  if(n&&n.type!=='comparator_neg'&&n.type!=='comparator_pos') openLabelEditor(n,e.clientX,e.clientY);
+});
+
+/* -- Drop -- */
+function paletteDrag(e,type){dragType=type;e.dataTransfer.effectAllowed='copy';}
+function canvasDrop(e){
+  e.preventDefault(); const {x,y}=canvasXY(e); if(!dragType) return;
+  saveHistory(); const c=CFG[dragType];
+  nodes.push({id:nextId++,type:dragType,x:x-c.w/2,y:y-c.h/2,w:c.w,h:c.h,label:c.def});
+  dragType=null; draw();
+}
+
+/* -- Label editor -- */
+let editingNode=null;
+function openLabelEditor(n,cx,cy){editingNode=n;const ed=document.getElementById('labelEditor');ed.style.display='flex';ed.style.left=Math.min(cx,window.innerWidth-220)+'px';ed.style.top=Math.min(cy+10,window.innerHeight-120)+'px';const inp=document.getElementById('labelInput');inp.value=n.label||'';inp.focus();inp.select();}
+function commitLabel(){if(editingNode){editingNode.label=document.getElementById('labelInput').value||editingNode.label;draw();}closeLabelEditor();}
+function closeLabelEditor(){document.getElementById('labelEditor').style.display='none';editingNode=null;}
+document.getElementById('labelInput').addEventListener('keydown',e=>{if(e.key==='Enter')commitLabel();if(e.key==='Escape')closeLabelEditor();});
+
+/* -- History -- */
+function saveHistory(){history.push({nodes:JSON.parse(JSON.stringify(nodes)),edges:JSON.parse(JSON.stringify(edges))});if(history.length>40)history.shift();}
+function editorUndo(){if(!history.length)return;const s=history.pop();nodes=s.nodes;edges=s.edges;nextId=nodes.reduce((m,n)=>Math.max(m,n.id),0)+1;selectedNode=null;draw();}
+function editorClear(){saveHistory();nodes=[];edges=[];selectedNode=null;draw();}
+function deleteSelected(){if(!selectedNode)return;saveHistory();const id=selectedNode.id;nodes=nodes.filter(n=>n.id!==id);edges=edges.filter(e=>e.from!==id&&e.to!==id);selectedNode=null;draw();}
+
+/* -- Status -- */
+function setStatus(msg,ok=true){const el=document.getElementById('editorStatus');el.style.color=ok?'var(--accent)':'var(--accent3)';el.textContent=msg;setTimeout(()=>el.textContent='',5000);}
+
+/* == SOLVER ================================================== */
+function solveEditor(){
+  const rbox=document.getElementById('resultEditor');
+  const fEl=document.getElementById('formulaEditor');
+  const sEl=document.getElementById('stepsEditor');
+  const inp=nodes.find(n=>n.type==='input');
+  const out=nodes.find(n=>n.type==='output');
+  if(!inp||!out){setStatus('⚠ Necesitas nodo Entrada y Salida',false);return;}
+  const res=recognizeTopology();
+  if(res){
+    fEl.textContent=res.formula;
+    sEl.innerHTML=res.steps.map((s,i)=>`<div class="step-item"><div class="step-header" onclick="toggleStep(this)"><div class="step-num">${i+1}</div><div class="step-title">${s.title}</div><div class="step-arr">▼</div></div><div class="step-body ${i===0?'open':''}">${s.body}</div></div>`).join('');
+    rbox.classList.add('show');
+    rbox.scrollIntoView({behavior:'smooth',block:'nearest'});
+    setStatus('✓ Calculado correctamente');
+  } else {
+    fEl.textContent='No se pudo resolver — revisa las conexiones';
+    sEl.innerHTML='<div class="step">Asegúrate de que Entrada y Salida estén conectadas y que el diagrama tenga la topología correcta.</div>';
+    rbox.classList.add('show');
+    setStatus('⚠ Topología no reconocida',false);
+  }
+}
+
+function buildGraph(){
+  const m={};
+  for(const n of nodes) m[n.id]={node:n,out:[],in:[]};
+  for(const e of edges){if(m[e.from])m[e.from].out.push(e);if(m[e.to])m[e.to].in.push(e);}
+  return m;
+}
+function getLabel(id){return nodes.find(n=>n.id===id)?.label||'?';}
+
+// ── Virtual graph: collapse junctions transparently ──────────
+function buildVirtualGraph(){
+  const g = buildGraph();
+  const jSet = new Set(nodes.filter(n=>n.type==='junction').map(n=>n.id));
+
+  function realSuccessors(id, visited=new Set()){
+    const result=[];
+    for(const e of (g[id]?.out||[])){
+      if(visited.has(e.to)) continue;
+      visited.add(e.to);
+      if(jSet.has(e.to)){
+        result.push(...realSuccessors(e.to, visited));
+      } else {
+        result.push(e.to);
+      }
+    }
+    return result;
+  }
+
+  // Also build reverse: who points TO each node (through junctions)
+  const vOut={}, vIn={};
+  for(const n of nodes){
+    if(jSet.has(n.id)) continue;
+    const succs = [...new Set(realSuccessors(n.id, new Set([n.id])))];
+    vOut[n.id] = succs;
+    for(const s of succs){
+      if(!vIn[s]) vIn[s]=[];
+      if(!vIn[s].includes(n.id)) vIn[s].push(n.id);
+    }
+  }
+  return {vOut, vIn};
+}
+
+// Find all paths from startId to targetId — NO cycle protection on purpose
+// so feedback loops can be traversed. We limit depth instead.
+function allPaths(startId, targetId, vOut, visited=new Set(), depth=0){
+  if(startId===targetId) return [[startId]];
+  if(depth>12 || visited.has(startId)) return [];
+  visited = new Set(visited); visited.add(startId);
+  const paths=[];
+  for(const nxt of (vOut[startId]||[])){
+    for(const p of allPaths(nxt, targetId, vOut, visited, depth+1)){
+      paths.push([startId,...p]);
+    }
+  }
+  return paths;
+}
+
+// Find paths BACKWARDS from targetId using the reverse graph vIn
+// Used to find feedback: which nodes feed INTO compNeg?
+function allPathsReverse(startId, targetId, vIn, visited=new Set(), depth=0){
+  if(startId===targetId) return [[startId]];
+  if(depth>12 || visited.has(startId)) return [];
+  visited = new Set(visited); visited.add(startId);
+  const paths=[];
+  for(const prev of (vIn[startId]||[])){
+    for(const p of allPathsReverse(prev, targetId, vIn, visited, depth+1)){
+      paths.push([startId,...p]);
+    }
+  }
+  return paths;
+}
+
+// Extract only block labels from a path
+function pathBlocks(path){
+  return path.filter(id=>{
+    const n=nodes.find(nd=>nd.id===id);
+    return n&&n.type==='block';
+  }).map(id=>getLabel(id));
+}
+
+// Find the feedback path going INTO compId from downstream nodes.
+// Uses the REVERSE graph: start at compId, go backwards,
+// but only through nodes that are ALSO reachable forward from compId.
+function getFeedbackPath(compId, vOut, vIn){
+  // Step 1: find all nodes reachable forward from compId
+  const downstream = new Set();
+  function dfs(id, vis=new Set()){
+    if(vis.has(id)) return; vis.add(id);
+    for(const nxt of (vOut[id]||[])){downstream.add(nxt); dfs(nxt, vis);}
+  }
+  dfs(compId);
+
+  // Step 2: find predecessors of compId (nodes that point TO compId)
+  const feeders = (vIn[compId]||[]).filter(id=>downstream.has(id));
+  if(!feeders.length) return null;
+
+  // Step 3: for each feeder, collect the path feeder→compId via vOut
+  for(const feeder of feeders){
+    const paths = allPaths(feeder, compId, vOut, new Set(), 0);
+    if(paths.length) return paths[0];
+  }
+  return null;
+}
+
+function recognizeTopology(){
+  const {vOut, vIn} = buildVirtualGraph();
+  const inp  = nodes.find(n=>n.type==='input');
+  const out  = nodes.find(n=>n.type==='output');
+  const negs = nodes.filter(n=>n.type==='comparator_neg');
+  const poss = nodes.filter(n=>n.type==='comparator_pos');
+  const comps= nodes.filter(n=>n.type.startsWith('comparator'));
+  if(!inp||!out) return null;
+
+  // ── CASE 1: Sin comparadores
+  if(comps.length===0){
+    const paths = allPaths(inp.id, out.id, vOut);
+    if(!paths.length) return null;
+    if(paths.length===1){
+      const lbls = pathBlocks(paths[0]);
+      if(!lbls.length) return{formula:'Z/X = 1',steps:[{title:'Conexión directa',body:'Z/X = 1'}]};
+      const f = lbls.join(' · ');
+      return{formula:`Z/X = ${f}`,steps:[
+        {title:'Bloques en serie',body:lbls.map((l,i)=>`Bloque ${i+1}: ${l}`).join('\n')},
+        {title:'Caso 1 — Serie',body:`Z/X = ${f}`}
+      ]};
+    }
+    const bl = paths.map(p=>{const b=pathBlocks(p);return b.length?b.join('·'):'1';});
+    const f = bl.join(' + ');
+    return{formula:`Z/X = ${f}`,steps:[
+      {title:'Bloques en paralelo',body:bl.map((l,i)=>`Rama ${i+1}: ${l}`).join('\n')},
+      {title:'Caso 2 — Paralelo',body:`Z/X = ${f}`}
+    ]};
+  }
+
+  // ── CASE 2: 1 comparador negativo
+  if(negs.length===1 && poss.length===0){
+    const comp = negs[0];
+    const fwdPaths = allPaths(comp.id, out.id, vOut);
+    if(!fwdPaths.length) return null;
+    const fwdExprs = fwdPaths.map(p=>{const b=pathBlocks(p);return b.length?b.join('·'):'1';});
+    const P = fwdExprs.length===1 ? fwdExprs[0] : `(${fwdExprs.join(' + ')})`;
+    const fbPath = getFeedbackPath(comp.id, vOut, vIn);
+    const fbBlocks = fbPath ? pathBlocks(fbPath) : [];
+    const H = fbBlocks.length ? fbBlocks.join('·') : '1';
+    const Hd = fbBlocks.length ? H : 'H = 1 (directa)';
+    const f = `${P} / (1 + ${P}·${H})`;
+    return{formula:`Z/X = ${f}`,steps:[
+      {title:'Rama directa',body:fwdExprs.length>1
+        ?`Ramas paralelas:\n${fwdExprs.map((e,i)=>`  Rama ${i+1}: ${e}`).join('\n')}\nG_eq = ${P}`
+        :`Bloque(s) adelante: ${P}`},
+      {title:'Realimentación negativa',body:`H = ${Hd}`},
+      {title:'Ecuaciones',body:`E = X − Z·${H}\nZ = E·${P}\nZ·(1 + ${P}·${H}) = X·${P}`},
+      {title:'Resultado (Caso 3/4)',body:`Z/X = ${f}`}
+    ]};
+  }
+
+  // ── CASE 3: 1 comparador positivo
+  if(poss.length===1 && negs.length===0){
+    const comp = poss[0];
+    const fwdPaths = allPaths(comp.id, out.id, vOut);
+    if(!fwdPaths.length) return null;
+    const fwdExprs = fwdPaths.map(p=>{const b=pathBlocks(p);return b.length?b.join('·'):'1';});
+    const P = fwdExprs.length===1 ? fwdExprs[0] : `(${fwdExprs.join(' + ')})`;
+    const fbPath = getFeedbackPath(comp.id, vOut, vIn);
+    const fbBlocks = fbPath ? pathBlocks(fbPath) : [];
+    const H = fbBlocks.length ? fbBlocks.join('·') : '1';
+    const Hd = fbBlocks.length ? H : 'H = 1 (directa)';
+    const f = `${P} / (1 − ${P}·${H})`;
+    return{formula:`Z/X = ${f}`,steps:[
+      {title:'Rama directa (positiva)',body:`Bloque(s) adelante: ${P}`},
+      {title:'Realimentación positiva',body:`H = ${Hd}`},
+      {title:'Ecuaciones',body:`Z = (X + Z·${H})·${P}\nZ·(1 − ${P}·${H}) = X·${P}`},
+      {title:'Resultado (Caso 5/6)',body:`Z/X = ${f}`}
+    ]};
+  }
+
+  // ── CASE 4: 1 neg + 1 pos — tipo PAU
+  if(negs.length===1 && poss.length===1){
+    const compNeg = negs[0], compPos = poss[0];
+    const parallelPaths = allPaths(compNeg.id, compPos.id, vOut);
+    const afterPaths    = allPaths(compPos.id, out.id, vOut);
+    if(!parallelPaths.length) return null;
+    const branchExprs = parallelPaths.map(p=>{const b=pathBlocks(p);return b.length?b.join('·'):'1';});
+    const G_eq = branchExprs.length===1 ? branchExprs[0] : `(${branchExprs.join(' + ')})`;
+    const afterBlocks = afterPaths.length ? pathBlocks(afterPaths[0]) : [];
+    const P_total = afterBlocks.length ? `${G_eq}·${afterBlocks.join('·')}` : G_eq;
+    const fbPath = getFeedbackPath(compNeg.id, vOut, vIn);
+    const fbBlocks = fbPath ? pathBlocks(fbPath) : [];
+    const H = fbBlocks.length ? fbBlocks.join('·') : '1';
+    const Hd = fbBlocks.length ? H : 'H = 1 (directa)';
+    const f = `(${P_total}) / (1 + (${P_total})·${H})`;
+    return{formula:`Z/X = ${f}`,steps:[
+      {title:'Ramas paralelas (⊗ → ⊕)',
+       body:branchExprs.map((e,i)=>`Rama ${i+1}: ${e}`).join('\n')+`\nG_eq = ${branchExprs.join(' + ')}`},
+      {title:'Bloque global adelante',
+       body:afterBlocks.length?`G_eq · ${afterBlocks.join('·')} = ${P_total}`:`G_total = ${P_total}`},
+      {title:'Realimentación negativa',body:`H = ${Hd}`},
+      {title:'Aplicar fórmula',body:`Z/X = G_total/(1+G_total·H) = (${P_total})/(1+(${P_total})·${H})`},
+      {title:'Resultado',body:`Z/X = ${f}`}
+    ]};
+  }
+
+  return{formula:'Sistema complejo',steps:[
+    {title:'No reconocido automáticamente',
+     body:`Comparadores neg: ${negs.length}, pos: ${poss.length}\nUsa la Calculadora para topologías predefinidas.`}
+  ]};
+}
+
+
+/* == CALCULADORA ============================================== */
+const TOPOS=[
+  {id:1,name:'Bloques en serie',formula:'Z/X=P₁·P₂·P₃',inputs:['P₁','P₂','P₃'],
+   diagram:p=>sw(480,70,svglb(2,40,'X')+svgar(18,36,55,36)+bk(55,20,80,32,p[0]||'P₁')+svgar(135,36,170,36)+bk(170,20,80,32,p[1]||'P₂')+svgar(250,36,285,36)+bk(285,20,80,32,p[2]||'P₃')+svgar(365,36,415,36)+svglb(417,40,'Z')),
+   compute:v=>{const[a,b,c]=v;return{formula:`Z/X = ${a}·${b}·${c}`,steps:[`X → P₁ → X·${a}`,`→ P₂ → X·${a}·${b}`,`→ P₃ → Z = X·${a}·${b}·${c}`,`Z/X = P₁·P₂·P₃`]}}},
+  {id:2,name:'Bloques en paralelo',formula:'Z/X=P₁+P₂',inputs:['P₁','P₂'],
+   diagram:p=>sw(400,120,svglb(2,65,'X')+svgar(18,60,55,60)+svgln(55,60,55,30)+svgln(55,60,55,90)+svgar(55,30,115,30)+bk(115,14,80,32,p[0]||'P₁')+svgar(195,30,265,30)+svgln(265,30,265,60)+svgar(55,90,115,90)+bk(115,74,80,32,p[1]||'P₂')+svgar(195,90,265,90)+svgln(265,90,265,60)+cp(265,60,'+')+svgar(283,60,355,60)+svglb(357,64,'Z')),
+   compute:v=>{const[a,b]=v;return{formula:`Z/X = ${a} + ${b}`,steps:[`Rama 1: X·${a}`,`Rama 2: X·${b}`,`Z = X·(${a}+${b})`,`Z/X = ${a} + ${b}`]}}},
+  {id:3,name:'Realiment. neg. directa',formula:'Z/X=P/(1+P)',inputs:['P'],
+   diagram:p=>sw(400,120,svglb(2,55,'X')+svgar(18,50,50,50)+cp(70,50,'-')+svgar(88,50,125,50)+bk(125,34,90,32,p[0]||'P')+svgar(215,50,305,50)+svglb(307,54,'Z')+svgln(285,50,285,95)+svgln(285,95,70,95)+svgar(70,95,70,70)),
+   compute:v=>{const[a]=v;return{formula:`Z/X = ${a} / (1 + ${a})`,steps:[`E = X − Z`,`Z = (X−Z)·${a}`,`Z·(1+${a}) = X·${a}`,`Z/X = ${a} / (1 + ${a})`]}}},
+  {id:4,name:'Realiment. negativa',formula:'Z/X=P₁/(1+P₁·P₂)',inputs:['P₁','P₂'],
+   diagram:p=>sw(460,130,svglb(2,60,'X')+svgar(18,55,50,55)+cp(70,55,'-')+svgar(88,55,125,55)+bk(125,39,80,32,p[0]||'P₁')+svgar(205,55,345,55)+svglb(347,59,'Z')+svgln(325,55,325,105)+svgar(325,105,210,105)+bk(130,89,80,32,p[1]||'P₂')+svgar(130,105,70,105)+svgln(70,105,70,75)),
+   compute:v=>{const[a,b]=v;return{formula:`Z/X = ${a} / (1 + ${a}·${b})`,steps:[`E = X − Z·${b}`,`Z = (X−Z·${b})·${a}`,`Z·(1+${a}·${b}) = X·${a}`,`Z/X = ${a} / (1 + ${a}·${b})`]}}},
+  {id:5,name:'Realiment. pos. directa',formula:'Z/X=P/(1−P)',inputs:['P'],
+   diagram:p=>sw(400,120,svglb(2,55,'X')+svgar(18,50,50,50)+cp(70,50,'+')+svgar(88,50,125,50)+bk(125,34,90,32,p[0]||'P')+svgar(215,50,305,50)+svglb(307,54,'Z')+svgln(285,50,285,95)+svgln(285,95,70,95)+svgar(70,95,70,70)),
+   compute:v=>{const[a]=v;return{formula:`Z/X = ${a} / (1 − ${a})`,steps:[`E = X + Z`,`Z = (X+Z)·${a}`,`Z·(1−${a}) = X·${a}`,`Z/X = ${a} / (1 − ${a})`]}}},
+  {id:6,name:'Realiment. positiva',formula:'Z/X=P₁/(1−P₁·P₂)',inputs:['P₁','P₂'],
+   diagram:p=>sw(460,130,svglb(2,60,'X')+svgar(18,55,50,55)+cp(70,55,'+')+svgar(88,55,125,55)+bk(125,39,80,32,p[0]||'P₁')+svgar(205,55,345,55)+svglb(347,59,'Z')+svgln(325,55,325,105)+svgar(325,105,210,105)+bk(130,89,80,32,p[1]||'P₂')+svgar(130,105,70,105)+svgln(70,105,70,75)),
+   compute:v=>{const[a,b]=v;return{formula:`Z/X = ${a} / (1 − ${a}·${b})`,steps:[`E = X + Z·${b}`,`Z = (X+Z·${b})·${a}`,`Z·(1−${a}·${b}) = X·${a}`,`Z/X = ${a} / (1 − ${a}·${b})`]}}},
+  {id:7,name:'Realiment. neg. retorno',formula:'Z/X=1/(1+P)',inputs:['P'],
+   diagram:p=>sw(400,120,svglb(2,55,'X')+svgar(18,50,50,50)+cp(70,50,'-')+svgar(88,50,305,50)+svglb(307,54,'Z')+svgln(285,50,285,95)+svgar(285,95,155,95)+bk(75,79,80,32,p[0]||'P')+svgar(75,95,70,95)+svgln(70,95,70,70)),
+   compute:v=>{const[a]=v;return{formula:`Z/X = 1 / (1 + ${a})`,steps:[`E = X − Z·${a}`,`Z = X − Z·${a}`,`Z·(1+${a}) = X`,`Z/X = 1 / (1 + ${a})`]}}},
+  {id:8,name:'Realiment. pos. retorno',formula:'Z/X=1/(1−P)',inputs:['P'],
+   diagram:p=>sw(400,120,svglb(2,55,'X')+svgar(18,50,50,50)+cp(70,50,'+')+svgar(88,50,305,50)+svglb(307,54,'Z')+svgln(285,50,285,95)+svgar(285,95,155,95)+bk(75,79,80,32,p[0]||'P')+svgar(75,95,70,95)+svgln(70,95,70,70)),
+   compute:v=>{const[a]=v;return{formula:`Z/X = 1 / (1 − ${a})`,steps:[`E = X + Z·${a}`,`Z = X + Z·${a}`,`Z·(1−${a}) = X`,`Z/X = 1 / (1 − ${a})`]}}},
+];
+const AD=`<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4a5568"/></marker></defs>`;
+const sw=(w,h,c)=>`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" font-family="Space Mono,monospace">${AD}${c}</svg>`;
+const bk=(x,y,w,h,t,col='#4fd1c5')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#1e2d4a" stroke="${col}" stroke-width="1.5"/><text x="${x+w/2}" y="${y+h/2+5}" text-anchor="middle" fill="#e2e8f0" font-size="13">${t}</text>`;
+const cp=(cx,cy,s='-')=>`<circle cx="${cx}" cy="${cy}" r="18" fill="#2a1f3d" stroke="#9f7aea" stroke-width="1.5"/><text x="${cx}" y="${cy+5}" text-anchor="middle" fill="#9f7aea" font-size="14">⊕</text><text x="${cx-12}" y="${cy-4}" fill="#4fd1c5" font-size="10">+</text><text x="${cx-12}" y="${cy+13}" fill="${s==='-'?'#fc8181':'#4fd1c5'}" font-size="10">${s}</text>`;
+const svgar=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#4a5568" stroke-width="1.5" marker-end="url(#ah)"/>`;
+const svgln=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#4a5568" stroke-width="1.5"/>`;
+const svglb=(x,y,t,c='#e2e8f0')=>`<text x="${x}" y="${y}" fill="${c}" font-size="12">${t}</text>`;
+
+let selTopo=null;
+function renderTopoGrid(){document.getElementById('topoGrid').innerHTML=TOPOS.map(t=>`<button class="topo-btn" onclick="selectTopo(${t.id})"><span class="tn">CASO ${t.id}</span><span class="tt">${t.name}</span><span class="tf">${t.formula}</span></button>`).join('');}
+function selectTopo(id){selTopo=TOPOS.find(t=>t.id===id);document.querySelectorAll('.topo-btn').forEach((b,i)=>b.classList.toggle('selected',TOPOS[i].id===id));renderDiag();renderInps();document.getElementById('resultBox').classList.remove('show');}
+function renderDiag(){const a=document.getElementById('diagramArea');if(!selTopo)return;a.innerHTML=selTopo.diagram(selTopo.inputs);}
+function renderInps(){const r=document.getElementById('inputsRow');if(!selTopo){r.innerHTML='';return;}r.innerHTML=selTopo.inputs.map((n,i)=>`<div class="input-group"><label>Bloque ${n}</label><input type="text" id="inp_${i}" placeholder="${n}" oninput="updateDiag()"/></div>`).join('');}
+function updateDiag(){if(!selTopo)return;const v=selTopo.inputs.map((_,i)=>document.getElementById(`inp_${i}`)?.value.trim()||selTopo.inputs[i]);document.getElementById('diagramArea').innerHTML=selTopo.diagram(v);}
+function solve(){if(!selTopo){alert('Selecciona una topología');return;}const v=selTopo.inputs.map((_,i)=>document.getElementById(`inp_${i}`)?.value.trim()||selTopo.inputs[i]);const res=selTopo.compute(v);document.getElementById('resultFormula').textContent=res.formula;document.getElementById('resultSteps').innerHTML=res.steps.map(s=>`<div class="step">${s}</div>`).join('');const b=document.getElementById('resultBox');b.classList.add('show');b.scrollIntoView({behavior:'smooth',block:'nearest'});}
+
+function solvePAU(){
+  document.getElementById('formulaPAU').textContent='Y(s)/R(s) = (G₁ + G₂) / (1 + (G₁ + G₂)·H₁)';
+  const steps=[
+    {title:'Identificar ramas en paralelo (G₁ y G₂)',body:'G₂(s) y G₁(s) comparten la misma entrada E(s)\ny se suman en el comparador de salida (⊕).\n→ Bloque equivalente: G_eq = G₁(s) + G₂(s)'},
+    {title:'Reducir a bloque equivalente (Caso 2)',body:'G_eq(s) = G₁(s) + G₂(s)\nEl sistema queda: comparador → G_eq → Y(s)\ncon realimentación H₁(s).'},
+    {title:'Aplicar realimentación negativa (Caso 4)',body:'Y/R = G_eq / (1 + G_eq·H₁)\nSustituyendo:\nY/R = (G₁+G₂) / (1 + (G₁+G₂)·H₁)'},
+    {title:'Resultado final',body:'Y(s)        G₁(s) + G₂(s)\n---- = ------------------------------\nR(s)    1 + [G₁(s) + G₂(s)] · H₁(s)'}
+  ];
+  document.getElementById('stepsPAU').innerHTML=steps.map((s,i)=>`<div class="step-item"><div class="step-header" onclick="toggleStep(this)"><div class="step-num">${i+1}</div><div class="step-title">${s.title}</div><div class="step-arr">▼</div></div><div class="step-body ${i===0?'open':''}">${s.body}</div></div>`).join('');
+  const b=document.getElementById('resultPAU');b.classList.add('show');b.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function toggleStep(h){const b=h.nextElementSibling;b.classList.toggle('open');h.querySelector('.step-arr').style.transform=b.classList.contains('open')?'rotate(180deg)':'';}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='editor')setTimeout(resizeCanvas,60);
+}
+
+renderTopoGrid();
+</script>
+</body>
+</html>

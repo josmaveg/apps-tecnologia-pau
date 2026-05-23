@@ -27,6 +27,9 @@
   --ease:    cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Estilo iconos Lofi */
+.lofi-icon-box { font-size: 2.5rem; padding: 2rem 1rem; text-align: center; background: rgba(255,255,255,0.02); }
+
 html { scroll-behavior: smooth; }
 body {
   background: var(--black);
@@ -143,39 +146,9 @@ header {
   font-size: 15px; color: var(--muted); line-height: 1.7;
   max-width: 480px; margin-bottom: 1.5rem;
 }
-.hero-pills {
-  display: flex; gap: 8px; flex-wrap: wrap;
-}
-.pill {
-  display: flex; align-items: center; gap: 5px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 100px;
-  padding: 4px 12px;
-  font-size: 11px; font-weight: 500; color: var(--text);
-  letter-spacing: 0.02em;
-  backdrop-filter: blur(8px);
-}
-.pill-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 
 /* ─── LAYOUT ──────────────────────────────── */
 .page { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
-
-/* ─── SECTION HEADER ─────────────────────── */
-.section-head {
-  display: flex; align-items: center; gap: 16px;
-  padding: 3rem 0 1.5rem;
-}
-.section-num {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--hint);
-  white-space: nowrap;
-}
-.section-title {
-  font-size: 11px; font-weight: 600; color: var(--text);
-  letter-spacing: 0.06em; text-transform: uppercase;
-}
-.section-line { flex: 1; height: 1px; background: var(--border); }
 
 /* ─── FREE GRID ───────────────────────────── */
 .grid-free {
@@ -187,31 +160,6 @@ header {
   border-radius: 4px;
   overflow: hidden;
 }
-
-/* ─── PRO BANNER ─────────────────────────── */
-.pro-strip {
-  margin: 3rem 0 0;
-  background: linear-gradient(90deg, rgba(75,107,251,0.14) 0%, rgba(232,200,64,0.07) 100%);
-  border: 1px solid rgba(75,107,251,0.28);
-  border-radius: 4px;
-  padding: 1.1rem 1.5rem;
-  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
-}
-.pro-strip-icon { font-size: 1.4rem; flex-shrink: 0; }
-.pro-strip-text { flex: 1; }
-.pro-strip-text strong { font-size: 13px; font-weight: 600; color: var(--white); display: block; }
-.pro-strip-text span { font-size: 12px; color: var(--muted); }
-.btn-pro {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--gold); color: #000;
-  padding: 8px 18px; border-radius: 4px;
-  font-size: 12px; font-weight: 700;
-  text-decoration: none; white-space: nowrap;
-  letter-spacing: 0.02em;
-  transition: opacity .2s;
-  flex-shrink: 0;
-}
-.btn-pro:hover { opacity: .86; }
 
 /* ─── PRO GRID ────────────────────────────── */
 .grid-pro {
@@ -237,38 +185,13 @@ header {
 .mod-card.locked { cursor: pointer; }
 .mod-card.locked:hover { background: #131313; }
 
-.mod-img {
-  width: 100%; aspect-ratio: 16/7;
-  object-fit: cover;
-  display: block;
-  filter: brightness(0.82);
-  transition: filter .3s var(--ease);
-}
-.mod-card:hover .mod-img { filter: brightness(0.95); }
-.mod-img-placeholder {
-  width: 100%; aspect-ratio: 16/7;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.2rem;
-}
-
 .mod-body { padding: 1.1rem 1.25rem 1.25rem; flex: 1; display: flex; flex-direction: column; gap: .6rem; }
-.mod-meta {
-  display: flex; align-items: center; justify-content: space-between;
-}
-.mod-num { font-size: 10px; color: var(--hint); letter-spacing: 0.08em; font-weight: 500; }
-.mod-tag {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
-  text-transform: uppercase; padding: 2px 8px; border-radius: 2px;
-}
-.tag-free  { background: rgba(46,204,138,0.12); color: var(--green); }
-.tag-pro   { background: rgba(232,200,64,0.10);  color: var(--gold); }
 
 .mod-title {
   font-family: var(--serif);
   font-size: 1.15rem; line-height: 1.2;
   color: var(--white); letter-spacing: -0.01em;
 }
-.mod-desc { font-size: 12px; color: var(--muted); line-height: 1.6; flex: 1; }
 
 .mod-foot {
   padding: 0 1.25rem 1.1rem;
@@ -328,23 +251,6 @@ header {
 }
 .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--white); }
 .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-.pillar {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1.1rem 1.25rem;
-}
-.pillar-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: .6rem; }
-.pillar-num {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
-  color: var(--accent); background: rgba(75,107,251,0.14);
-  padding: 2px 8px; border-radius: 2px;
-}
-.pillar h3 { font-family: var(--serif); font-size: 1rem; color: var(--white); }
-.pillar p  { font-size: 13px; color: var(--muted); line-height: 1.7; }
-.pillar ul { padding-left: 1.1rem; margin-top: .4rem; }
-.pillar ul li { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 2px; }
-.pillar ul li strong { color: var(--text); font-weight: 600; }
 
 @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 ::-webkit-scrollbar { width: 4px; }
@@ -381,22 +287,44 @@ header {
 
 <div class="page">
   <div class="grid-free">
-    <div class="mod-card"><div class="mod-body"><div class="mod-title">Motores Otto vs Diesel</div></div>
-      <div class="mod-foot"><a href="motores-otto-diesel.html" class="mod-link link-orange">Abrir simulador →</a></div>
+    <div class="mod-card">
+        <div class="lofi-icon-box">⚙️</div>
+        <div class="mod-body"><div class="mod-title">Motores Otto vs Diesel</div></div>
+        <div class="mod-foot"><a href="motores-otto-diesel.html" class="mod-link link-orange">Abrir simulador →</a></div>
     </div>
-    <div class="mod-card"><div class="mod-body"><div class="mod-title">Inteligencia Artificial</div></div>
-      <div class="mod-foot"><button onclick="abrirIA()" class="mod-link link-indigo">Ver apuntes →</button></div>
+    <div class="mod-card">
+        <div class="lofi-icon-box">🧠</div>
+        <div class="mod-body"><div class="mod-title">Inteligencia Artificial</div></div>
+        <div class="mod-foot"><button onclick="abrirIA()" class="mod-link link-indigo">Ver apuntes →</button></div>
     </div>
-    <div class="mod-card"><div class="mod-body"><div class="mod-title">Electrónica Digital</div></div>
-      <div class="mod-foot"><a href="digital-lab.html" class="mod-link link-blue">Abrir simulador →</a></div>
+    <div class="mod-card">
+        <div class="lofi-icon-box">⚡</div>
+        <div class="mod-body"><div class="mod-title">Electrónica Digital</div></div>
+        <div class="mod-foot"><a href="digital-lab.html" class="mod-link link-blue">Abrir simulador →</a></div>
     </div>
   </div>
 
   <div class="grid-pro" id="pro-grid">
-    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Ensayo de Tracción</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
-    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Circuitos RLC</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
-    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Diagramas de Vigas</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
-    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Automática</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
+    <div class="mod-card locked" onclick="handleProClick()">
+        <div class="lofi-icon-box">🛠️</div>
+        <div class="mod-body"><div class="mod-title">Ensayo de Tracción</div></div>
+        <div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div>
+    </div>
+    <div class="mod-card locked" onclick="handleProClick()">
+        <div class="lofi-icon-box">〰️</div>
+        <div class="mod-body"><div class="mod-title">Circuitos RLC</div></div>
+        <div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div>
+    </div>
+    <div class="mod-card locked" onclick="handleProClick()">
+        <div class="lofi-icon-box">🏗️</div>
+        <div class="mod-body"><div class="mod-title">Diagramas de Vigas</div></div>
+        <div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div>
+    </div>
+    <div class="mod-card locked" onclick="handleProClick()">
+        <div class="lofi-icon-box">🤖</div>
+        <div class="mod-body"><div class="mod-title">Automática</div></div>
+        <div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div>
+    </div>
   </div>
 </div>
 

@@ -294,24 +294,6 @@ header {
 .arrow { font-size: 13px; transition: transform .18s; }
 .mod-link:hover .arrow { transform: translateX(3px); }
 
-.locked-overlay {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.0);
-  pointer-events: none;
-}
-
-/* ─── FOOTER ─────────────────────────────── */
-footer {
-  margin-top: 5rem;
-  border-top: 1px solid var(--border);
-  padding: 2rem;
-  display: flex; flex-wrap: wrap; gap: .5rem;
-  align-items: center; justify-content: space-between;
-  font-size: 11px; color: var(--hint);
-  letter-spacing: 0.04em;
-}
-
 /* ─── MODAL ───────────────────────────────── */
 #ia-modal {
   display: none; position: fixed; inset: 0; z-index: 300;
@@ -364,41 +346,14 @@ footer {
 .pillar ul li { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 2px; }
 .pillar ul li strong { color: var(--text); font-weight: 600; }
 
-/* ─── ANIMATIONS ──────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.hero-eyebrow { animation: fadeUp .7s var(--ease) .1s both; }
-.hero-title   { animation: fadeUp .8s var(--ease) .18s both; }
-.hero-desc    { animation: fadeUp .8s var(--ease) .26s both; }
-.hero-pills   { animation: fadeUp .8s var(--ease) .34s both; }
-
-/* ─── SCROLLBAR ───────────────────────────── */
+@keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
-
-/* ─── RESPONSIVE ──────────────────────────── */
-@media (max-width: 860px) {
-  .grid-free { grid-template-columns: 1fr; }
-  .grid-pro  { grid-template-columns: 1fr; }
-  .hero-content { padding: 0 1.5rem 2.5rem; }
-  .page { padding: 0 1.25rem; }
-  header { padding: 0 1.25rem; }
-  .hdr-name, .hdr-sub { display: none; }
-  .pro-strip { flex-direction: column; align-items: flex-start; }
-  footer { flex-direction: column; align-items: flex-start; }
-}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <a href="#" class="hdr-logo">
     <div class="hdr-badge">T2</div>
@@ -415,243 +370,40 @@ footer {
   </div>
 </header>
 
-<!-- HERO -->
 <section class="hero">
-  <img class="hero-img"
-    src="https://images-assets.nasa.gov/image/iss040e078907/iss040e078907~orig.jpg"
-    alt="Astronauta en maniobra extravehicular en la ISS"
-    onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(160deg,#040816 0%,#0d1535 50%,#060b1e 100%)'">
+  <img class="hero-img" src="https://images-assets.nasa.gov/image/iss040e078907/iss040e078907~orig.jpg" alt="Astronauta">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow">2º Bachillerato · PAU CyL · Tecnología e Ingeniería II</div>
     <h1 class="hero-title">Simulador<br><em>de Tecnología</em><br>e Ingeniería II</h1>
-    <p class="hero-desc">Simuladores interactivos y apuntes visuales para preparar la PAU. Diseñados para entender, no para memorizar.</p>
-    <div class="hero-pills">
-      <span class="pill"><span class="pill-dot" style="background:#2ECC8A"></span>3 módulos gratuitos</span>
-      <span class="pill"><span class="pill-dot" style="background:#E8C840"></span>4 módulos PRO</span>
-      <span class="pill"><span class="pill-dot" style="background:#4B6BFB"></span>PAU 2025</span>
-    </div>
+    <p class="hero-desc">Simuladores interactivos para preparar la PAU.</p>
   </div>
 </section>
 
-<!-- MAIN -->
 <div class="page">
-
-  <!-- MÓDULOS GRATUITOS -->
-  <div class="section-head">
-    <span class="section-num">01</span>
-    <span class="section-title">Acceso libre</span>
-    <span class="section-line"></span>
-  </div>
-
   <div class="grid-free">
-
-    <!-- Motores -->
-    <div class="mod-card">
-      <img class="mod-img"
-        src="https://images-assets.nasa.gov/image/GRC-2017-C-06025/GRC-2017-C-06025~orig.jpg"
-        alt="Motor"
-        onerror="this.outerHTML='<div class=\'mod-img-placeholder\' style=\'background:#1a0f06\'>🔥</div>'">
-      <div class="mod-body">
-        <div class="mod-meta">
-          <span class="mod-num">01</span>
-          <span class="mod-tag tag-free">Gratis</span>
-        </div>
-        <div class="mod-title">Motores Otto vs Diesel</div>
-        <p class="mod-desc">Simulación animada de los 4 tiempos. Cálculo de eficiencia térmica con parámetros ajustables en tiempo real.</p>
-      </div>
-      <div class="mod-foot">
-        <a href="motores-otto-diesel.html" class="mod-link link-orange">Abrir simulador <span class="arrow">→</span></a>
-      </div>
+    <div class="mod-card"><div class="mod-body"><div class="mod-title">Motores Otto vs Diesel</div></div>
+      <div class="mod-foot"><a href="motores-otto-diesel.html" class="mod-link link-orange">Abrir simulador →</a></div>
     </div>
-
-    <!-- IA -->
-    <div class="mod-card">
-      <img class="mod-img"
-        src="https://images-assets.nasa.gov/image/iss062e129303/iss062e129303~orig.jpg"
-        alt="Inteligencia Artificial"
-        onerror="this.outerHTML='<div class=\'mod-img-placeholder\' style=\'background:#0d0a1a\'>🤖</div>'">
-      <div class="mod-body">
-        <div class="mod-meta">
-          <span class="mod-num">02</span>
-          <span class="mod-tag tag-free">Gratis</span>
-        </div>
-        <div class="mod-title">Inteligencia Artificial</div>
-        <p class="mod-desc">Los 4 pilares de la IA para la PAU: aprendizaje automático, redes neuronales, ética y aplicaciones.</p>
-      </div>
-      <div class="mod-foot">
-        <button onclick="abrirIA()" class="mod-link link-indigo">Ver apuntes <span class="arrow">→</span></button>
-      </div>
+    <div class="mod-card"><div class="mod-body"><div class="mod-title">Inteligencia Artificial</div></div>
+      <div class="mod-foot"><button onclick="abrirIA()" class="mod-link link-indigo">Ver apuntes →</button></div>
     </div>
-
-    <!-- Electrónica -->
-    <div class="mod-card">
-      <img class="mod-img"
-        src="https://images-assets.nasa.gov/image/jsc2019e038246/jsc2019e038246~orig.jpg"
-        alt="Electrónica Digital"
-        onerror="this.outerHTML='<div class=\'mod-img-placeholder\' style=\'background:#060c1a\'>🔌</div>'">
-      <div class="mod-body">
-        <div class="mod-meta">
-          <span class="mod-num">03</span>
-          <span class="mod-tag tag-free">Gratis</span>
-        </div>
-        <div class="mod-title">Electrónica Digital</div>
-        <p class="mod-desc">Simplificación con mapas de Karnaugh. Síntesis de circuitos con puertas universales NAND y NOR.</p>
-      </div>
-      <div class="mod-foot">
-        <a href="digital-lab.html" class="mod-link link-blue">Abrir simulador <span class="arrow">→</span></a>
-      </div>
+    <div class="mod-card"><div class="mod-body"><div class="mod-title">Electrónica Digital</div></div>
+      <div class="mod-foot"><a href="digital-lab.html" class="mod-link link-blue">Abrir simulador →</a></div>
     </div>
-
   </div>
 
-  <!-- PRO STRIP -->
-  <div class="pro-strip">
-    <div class="pro-strip-icon">☕</div>
-    <div class="pro-strip-text">
-      <strong>Desbloquea los 4 módulos PRO</strong>
-      <span>Apoya con un café en Ko-fi · Recibes el código al momento · Acceso de por vida</span>
-    </div>
-    <a href="https://ko-fi.com/s/2bfd4d2bdd" target="_blank" class="btn-pro">Hazte PRO →</a>
-  </div>
-
-  <!-- MÓDULOS PRO -->
-  <div class="section-head" style="padding-top:1.5rem">
-    <span class="section-num">02</span>
-    <span class="section-title">Plan PRO</span>
-    <span class="section-line"></span>
-  </div>
-
-  <div class="grid-pro">
-
-    <!-- Tracción -->
-    <div class="mod-card locked" onclick="handleProClick()">
-      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#0f0a05 0%,#1a1005 100%); filter:brightness(0.6)">💪</div>
-      <div class="mod-body" style="opacity:.5">
-        <div class="mod-meta">
-          <span class="mod-num">04</span>
-          <span class="mod-tag tag-pro">PRO</span>
-        </div>
-        <div class="mod-title">Ensayo de Tracción</div>
-        <p class="mod-desc">Simulación dinámica de comportamiento mecánico y curva tensión-deformación σ-ε interactiva.</p>
-      </div>
-      <div class="mod-foot">
-        <span class="mod-link link-locked">🔒 Bloqueado</span>
-      </div>
-    </div>
-
-    <!-- RLC -->
-    <div class="mod-card locked" onclick="handleProClick()">
-      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#050a14 0%,#0a1020 100%); filter:brightness(0.6)">⚡</div>
-      <div class="mod-body" style="opacity:.5">
-        <div class="mod-meta">
-          <span class="mod-num">05</span>
-          <span class="mod-tag tag-pro">PRO</span>
-        </div>
-        <div class="mod-title">Circuitos RLC</div>
-        <p class="mod-desc">Visualización de fasores en tiempo real y calculadora de impedancias para circuitos serie y paralelo.</p>
-      </div>
-      <div class="mod-foot">
-        <span class="mod-link link-locked">🔒 Bloqueado</span>
-      </div>
-    </div>
-
-    <!-- Vigas -->
-    <div class="mod-card locked" onclick="handleProClick()">
-      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#060b08 0%,#0c1510 100%); filter:brightness(0.6)">🏗️</div>
-      <div class="mod-body" style="opacity:.5">
-        <div class="mod-meta">
-          <span class="mod-num">06</span>
-          <span class="mod-tag tag-pro">PRO</span>
-        </div>
-        <div class="mod-title">Diagramas de Vigas</div>
-        <p class="mod-desc">Cálculo de reacciones en apoyos y generación automática de diagramas de cortante y flector.</p>
-      </div>
-      <div class="mod-foot">
-        <span class="mod-link link-locked">🔒 Bloqueado</span>
-      </div>
-    </div>
-
-    <!-- Automática -->
-    <div class="mod-card locked" onclick="handleProClick()">
-      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#0a0805 0%,#160f06 100%); filter:brightness(0.6)">⚙️</div>
-      <div class="mod-body" style="opacity:.5">
-        <div class="mod-meta">
-          <span class="mod-num">07</span>
-          <span class="mod-tag tag-pro">PRO</span>
-        </div>
-        <div class="mod-title">Automática</div>
-        <p class="mod-desc">Funciones de transferencia, topologías de control y respuesta al escalón en lazo abierto y cerrado.</p>
-      </div>
-      <div class="mod-foot">
-        <span class="mod-link link-locked">🔒 Bloqueado</span>
-      </div>
-    </div>
-
+  <div class="grid-pro" id="pro-grid">
+    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Ensayo de Tracción</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
+    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Circuitos RLC</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
+    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Diagramas de Vigas</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
+    <div class="mod-card locked" onclick="handleProClick()"><div class="mod-body"><div class="mod-title">Automática</div></div><div class="mod-foot"><span class="mod-link link-locked">🔒 Bloqueado</span></div></div>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer>
-  <span>Apps Tecnología e Ingeniería II — 2º Bachillerato PAU CyL</span>
-  <span>Hecho con ☕ para alumnos que quieren aprobar</span>
-</footer>
-
-<!-- MODAL IA -->
-<div id="ia-modal">
-  <div class="modal-panel">
-    <div class="modal-hdr">
-      <span class="modal-hdr-title">🤖 Inteligencia Artificial — Apuntes PAU</span>
-      <button class="modal-close" onclick="cerrarIA()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="pillar">
-        <div class="pillar-hdr"><span class="pillar-num">01</span><h3>¿Qué es la Inteligencia Artificial?</h3></div>
-        <p>La IA es la rama de la informática que desarrolla sistemas capaces de realizar tareas que normalmente requieren inteligencia humana: reconocer imágenes, entender lenguaje, tomar decisiones o aprender de datos.</p>
-        <ul>
-          <li><strong>IA débil (estrecha):</strong> diseñada para una tarea específica. Ej: Siri, recomendadores de Netflix.</li>
-          <li><strong>IA general (fuerte):</strong> hipotética, capaz de razonar en cualquier dominio como un humano.</li>
-          <li><strong>IA generativa:</strong> crea contenido nuevo (texto, imágenes, código). Ej: ChatGPT, Dall-E.</li>
-        </ul>
-      </div>
-      <div class="pillar">
-        <div class="pillar-hdr"><span class="pillar-num">02</span><h3>Aprendizaje Automático (Machine Learning)</h3></div>
-        <p>El ML permite que los sistemas aprendan de datos sin ser programados explícitamente. El modelo ajusta sus parámetros para minimizar el error en sus predicciones.</p>
-        <ul>
-          <li><strong>Supervisado:</strong> se entrena con datos etiquetados. Ej: clasificar spam, predecir precios.</li>
-          <li><strong>No supervisado:</strong> encuentra patrones sin etiquetas. Ej: segmentación de clientes.</li>
-          <li><strong>Por refuerzo:</strong> el agente aprende por ensayo-error recibiendo recompensas. Ej: juegos, robótica.</li>
-        </ul>
-      </div>
-      <div class="pillar">
-        <div class="pillar-hdr"><span class="pillar-num">03</span><h3>Redes Neuronales y Deep Learning</h3></div>
-        <p>Las redes neuronales artificiales imitan el funcionamiento del cerebro con capas de neuronas interconectadas. El deep learning usa redes muy profundas para aprender representaciones complejas.</p>
-        <ul>
-          <li><strong>Neurona:</strong> recibe entradas, aplica pesos, suma y pasa por una función de activación (ReLU, sigmoide).</li>
-          <li><strong>CNN:</strong> redes convolucionales, ideales para imágenes y vídeo.</li>
-          <li><strong>RNN / Transformers:</strong> para secuencias de datos: texto, audio, series temporales.</li>
-          <li><strong>Backpropagation:</strong> algoritmo que ajusta los pesos propagando el error hacia atrás.</li>
-        </ul>
-      </div>
-      <div class="pillar">
-        <div class="pillar-hdr"><span class="pillar-num">04</span><h3>Ética, Sesgos e Impacto Social</h3></div>
-        <p>La IA plantea retos éticos fundamentales que la PAU suele preguntar:</p>
-        <ul>
-          <li><strong>Sesgo algorítmico:</strong> si los datos de entrenamiento son sesgados, el modelo también lo será.</li>
-          <li><strong>Transparencia (IA explicable):</strong> necesidad de entender por qué un sistema toma una decisión.</li>
-          <li><strong>Privacidad:</strong> los modelos pueden memorizar datos personales del entrenamiento.</li>
-          <li><strong>Impacto laboral:</strong> automatización de empleos rutinarios; nuevos roles tecnológicos.</li>
-          <li><strong>Regulación:</strong> la UE aprobó el AI Act (2024), primera ley global de IA por niveles de riesgo.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="ia-modal"><div class="modal-panel"><div class="modal-hdr"><span>IA</span><button class="modal-close" onclick="cerrarIA()">✕</button></div><div class="modal-body">Contenido...</div></div></div>
 
 <script>
   const PRO_CODE = "2213";
-
-  // Mapeo de títulos a sus archivos correspondientes
   const URL_MAP = {
       "Ensayo de Tracción": "ensayo-traccion.html",
       "Circuitos RLC": "circuitos-rlc.html",
@@ -660,58 +412,31 @@ footer {
   };
 
   function handleProClick() {
-    if (confirm("Este módulo es PRO.\n\n¿Quieres desbloquearlo apoyando con un café en Ko-fi?")) {
-      window.open("https://ko-fi.com/s/2bfd4d2bdd", "_blank");
-    }
+    if (confirm("Este módulo es PRO.\n\n¿Quieres desbloquearlo?")) window.open("https://ko-fi.com/s/2bfd4d2bdd", "_blank");
   }
 
   function activatePro() {
     document.querySelectorAll('.mod-card.locked').forEach(card => {
       card.classList.remove('locked');
       card.onclick = null;
-      
-      const body = card.querySelector('.mod-body');
-      const foot = card.querySelector('.mod-foot');
-      const tag  = card.querySelector('.mod-tag');
-      const img  = card.querySelector('.mod-img-placeholder');
       const title = card.querySelector('.mod-title').textContent.trim();
-      const targetUrl = URL_MAP[title] || "#";
-
-      if (body) body.style.opacity = '1';
-      if (img)  img.style.filter   = 'brightness(1)';
-      if (tag)  { tag.classList.replace('tag-pro','tag-free'); tag.textContent = 'PRO ✓'; }
-      
-      if (foot) foot.innerHTML = `<a href="${targetUrl}" class="mod-link link-indigo">Abrir simulador <span class="arrow">→</span></a>`;
+      const foot = card.querySelector('.mod-foot');
+      if (foot) foot.innerHTML = `<a href="${URL_MAP[title]}" class="mod-link link-indigo">Abrir simulador →</a>`;
     });
-    document.getElementById("code").value = "";
+    document.getElementById("code").placeholder = "¡Acceso PRO!";
   }
 
   function checkCode() {
-    const val = document.getElementById("code").value.trim();
-    if (val === PRO_CODE) {
+    if (document.getElementById("code").value.trim() === PRO_CODE) {
       sessionStorage.setItem("pau_pro", "true");
       activatePro();
-    } else {
-      const input = document.getElementById("code");
-      input.style.color = "#e05252";
-      setTimeout(() => { input.style.color = ""; input.value = ""; }, 900);
     }
   }
 
-  function abrirIA() {
-    document.getElementById("ia-modal").classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
-  function cerrarIA() {
-    document.getElementById("ia-modal").classList.remove("open");
-    document.body.style.overflow = "";
-  }
+  function abrirIA() { document.getElementById("ia-modal").classList.add("open"); }
+  function cerrarIA() { document.getElementById("ia-modal").classList.remove("open"); }
 
-  document.getElementById("ia-modal").addEventListener("click", e => { if (e.target === document.getElementById("ia-modal")) cerrarIA(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarIA(); });
-  document.getElementById("code").addEventListener("keydown", e => { if (e.key === "Enter") checkCode(); });
-
-  if (sessionStorage.getItem("pau_pro") === "true") activatePro();
+  window.onload = () => { if (sessionStorage.getItem("pau_pro") === "true") activatePro(); };
 </script>
 </body>
 </html>

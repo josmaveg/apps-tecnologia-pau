@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apps Tecnología e Ingeniería II — 2º Bachillerato · PAU CyL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:   #000;
+  --dark:    #0b0b0b;
+  --panel:   #111;
+  --border:  rgba(255,255,255,0.10);
+  --white:   #fff;
+  --text:    #f0ede8;
+  --muted:   rgba(240,237,232,0.68);
+  --hint:    rgba(240,237,232,0.40);
+  --accent:  #4B6BFB;
+  --gold:    #E8C840;
+  --green:   #2ECC8A;
+  --red:     #e05252;
+  --sans:    'Inter', system-ui, sans-serif;
+  --serif:   'DM Serif Display', Georgia, serif;
+  --ease:    cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─────────────────────────────── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 56px;
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 2rem;
+  gap: 1rem;
+}
+.hdr-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; flex-shrink: 0;
+}
+.hdr-badge {
+  width: 34px; height: 34px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  letter-spacing: -0.02em;
+}
+.hdr-name {
+  font-size: 13px; font-weight: 600; color: var(--white);
+  letter-spacing: -0.01em; line-height: 1.2;
+}
+.hdr-sub { font-size: 10px; color: var(--hint); letter-spacing: 0.04em; text-transform: uppercase; }
+.hdr-spacer { flex: 1; }
+.hdr-code {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden;
+  transition: border-color .2s;
+}
+.hdr-code:focus-within { border-color: var(--accent); }
+.hdr-code input {
+  background: transparent; border: none; outline: none;
+  color: var(--white); font-family: var(--sans);
+  font-size: 12px; padding: 6px 12px; width: 110px;
+}
+.hdr-code input::placeholder { color: var(--hint); }
+.hdr-code button {
+  background: var(--accent); border: none; color: #fff;
+  font-size: 11px; font-weight: 600; padding: 6px 14px;
+  cursor: pointer; letter-spacing: 0.03em;
+  transition: background .2s;
+}
+.hdr-code button:hover { background: #3a58e8; }
+.btn-kofi {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--gold); color: #000;
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 11px; font-weight: 700;
+  text-decoration: none; white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: opacity .2s;
+}
+.btn-kofi:hover { opacity: .85; }
+
+/* ─── HERO ────────────────────────────────── */
+.hero {
+  position: relative;
+  height: 72vh; min-height: 520px; max-height: 820px;
+  overflow: hidden;
+}
+.hero-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 28%;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to right,  rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.20) 60%, transparent 100%),
+    linear-gradient(to top,    rgba(0,0,0,0.80) 0%, transparent 50%),
+    linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, transparent 30%);
+}
+.hero-content {
+  position: relative; z-index: 2;
+  height: 100%;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 0 4rem 3.5rem;
+  max-width: 700px;
+}
+.hero-eyebrow {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: .75rem;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+.hero-title em { font-style: italic; color: #a5b4fc; }
+.hero-desc {
+  font-size: 15px; color: var(--muted); line-height: 1.7;
+  max-width: 480px; margin-bottom: 1.5rem;
+}
+.hero-pills {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.pill {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-size: 11px; font-weight: 500; color: var(--text);
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+}
+.pill-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+/* ─── LAYOUT ──────────────────────────────── */
+.page { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+/* ─── SECTION HEADER ─────────────────────── */
+.section-head {
+  display: flex; align-items: center; gap: 16px;
+  padding: 3rem 0 1.5rem;
+}
+.section-num {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--hint);
+  white-space: nowrap;
+}
+.section-title {
+  font-size: 11px; font-weight: 600; color: var(--text);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.section-line { flex: 1; height: 1px; background: var(--border); }
+
+/* ─── FREE GRID ───────────────────────────── */
+.grid-free {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* ─── PRO BANNER ─────────────────────────── */
+.pro-strip {
+  margin: 3rem 0 0;
+  background: linear-gradient(90deg, rgba(75,107,251,0.14) 0%, rgba(232,200,64,0.07) 100%);
+  border: 1px solid rgba(75,107,251,0.28);
+  border-radius: 4px;
+  padding: 1.1rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.pro-strip-icon { font-size: 1.4rem; flex-shrink: 0; }
+.pro-strip-text { flex: 1; }
+.pro-strip-text strong { font-size: 13px; font-weight: 600; color: var(--white); display: block; }
+.pro-strip-text span { font-size: 12px; color: var(--muted); }
+.btn-pro {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--gold); color: #000;
+  padding: 8px 18px; border-radius: 4px;
+  font-size: 12px; font-weight: 700;
+  text-decoration: none; white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: opacity .2s;
+  flex-shrink: 0;
+}
+.btn-pro:hover { opacity: .86; }
+
+/* ─── PRO GRID ────────────────────────────── */
+.grid-pro {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+/* ─── MODULE CARD ─────────────────────────── */
+.mod-card {
+  background: var(--panel);
+  display: flex; flex-direction: column;
+  cursor: default;
+  position: relative;
+  transition: background .22s var(--ease);
+}
+.mod-card:hover { background: #161616; }
+.mod-card.locked { cursor: pointer; }
+.mod-card.locked:hover { background: #131313; }
+
+.mod-img {
+  width: 100%; aspect-ratio: 16/7;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.82);
+  transition: filter .3s var(--ease);
+}
+.mod-card:hover .mod-img { filter: brightness(0.95); }
+.mod-img-placeholder {
+  width: 100%; aspect-ratio: 16/7;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+}
+
+.mod-body { padding: 1.1rem 1.25rem 1.25rem; flex: 1; display: flex; flex-direction: column; gap: .6rem; }
+.mod-meta {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mod-num { font-size: 10px; color: var(--hint); letter-spacing: 0.08em; font-weight: 500; }
+.mod-tag {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 2px 8px; border-radius: 2px;
+}
+.tag-free  { background: rgba(46,204,138,0.12); color: var(--green); }
+.tag-pro   { background: rgba(232,200,64,0.10);  color: var(--gold); }
+
+.mod-title {
+  font-family: var(--serif);
+  font-size: 1.15rem; line-height: 1.2;
+  color: var(--white); letter-spacing: -0.01em;
+}
+.mod-desc { font-size: 12px; color: var(--muted); line-height: 1.6; flex: 1; }
+
+.mod-foot {
+  padding: 0 1.25rem 1.1rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border); padding-top: .8rem;
+  margin-top: auto;
+}
+.mod-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600;
+  text-decoration: none; border: 1px solid;
+  padding: 5px 13px; border-radius: 3px;
+  transition: all .2s;
+  cursor: pointer; background: transparent; font-family: var(--sans);
+}
+.link-blue   { color: #93c5fd; border-color: rgba(147,197,253,.30); }
+.link-blue:hover   { background: rgba(147,197,253,.10); border-color: rgba(147,197,253,.55); color: #fff; }
+.link-orange { color: #fdba74; border-color: rgba(253,186,116,.28); }
+.link-orange:hover { background: rgba(253,186,116,.10); border-color: rgba(253,186,116,.55); color: #fff; }
+.link-indigo { color: #a5b4fc; border-color: rgba(165,180,252,.28); }
+.link-indigo:hover { background: rgba(165,180,252,.10); border-color: rgba(165,180,252,.55); color: #fff; }
+.link-locked { color: var(--hint); border-color: rgba(255,255,255,.10); cursor: not-allowed; opacity: .5; }
+.arrow { font-size: 13px; transition: transform .18s; }
+.mod-link:hover .arrow { transform: translateX(3px); }
+
+.locked-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.0);
+  pointer-events: none;
+}
+
+/* ─── FOOTER ─────────────────────────────── */
+footer {
+  margin-top: 5rem;
+  border-top: 1px solid var(--border);
+  padding: 2rem;
+  display: flex; flex-wrap: wrap; gap: .5rem;
+  align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--hint);
+  letter-spacing: 0.04em;
+}
+
+/* ─── MODAL ───────────────────────────────── */
+#ia-modal {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.80);
+  backdrop-filter: blur(14px);
+  padding: 1.5rem;
+}
+#ia-modal.open { display: flex; }
+.modal-panel {
+  background: #0f0f0f;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  width: 100%; max-width: 680px;
+  max-height: 86vh; overflow-y: auto;
+  animation: slideUp .3s var(--ease);
+}
+.modal-hdr {
+  position: sticky; top: 0; background: #0f0f0f;
+  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-radius: 6px 6px 0 0;
+}
+.modal-hdr-title { font-family: var(--serif); font-size: 1.05rem; color: var(--white); }
+.modal-close {
+  background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+  color: var(--muted); width: 30px; height: 30px;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.12); color: var(--white); }
+.modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.pillar {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.1rem 1.25rem;
+}
+.pillar-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: .6rem; }
+.pillar-num {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  color: var(--accent); background: rgba(75,107,251,0.14);
+  padding: 2px 8px; border-radius: 2px;
+}
+.pillar h3 { font-family: var(--serif); font-size: 1rem; color: var(--white); }
+.pillar p  { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.pillar ul { padding-left: 1.1rem; margin-top: .4rem; }
+.pillar ul li { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 2px; }
+.pillar ul li strong { color: var(--text); font-weight: 600; }
+
+/* ─── ANIMATIONS ──────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-eyebrow { animation: fadeUp .7s var(--ease) .1s both; }
+.hero-title   { animation: fadeUp .8s var(--ease) .18s both; }
+.hero-desc    { animation: fadeUp .8s var(--ease) .26s both; }
+.hero-pills   { animation: fadeUp .8s var(--ease) .34s both; }
+
+/* ─── SCROLLBAR ───────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+/* ─── RESPONSIVE ──────────────────────────── */
+@media (max-width: 860px) {
+  .grid-free { grid-template-columns: 1fr; }
+  .grid-pro  { grid-template-columns: 1fr; }
+  .hero-content { padding: 0 1.5rem 2.5rem; }
+  .page { padding: 0 1.25rem; }
+  header { padding: 0 1.25rem; }
+  .hdr-name, .hdr-sub { display: none; }
+  .pro-strip { flex-direction: column; align-items: flex-start; }
+  footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="hdr-logo">
+    <div class="hdr-badge">T2</div>
+    <div>
+      <div class="hdr-name">Tecnología e Ingeniería II</div>
+      <div class="hdr-sub">2º Bach · PAU CyL</div>
+    </div>
+  </a>
+  <div class="hdr-spacer"></div>
+  <a href="https://ko-fi.com/s/2bfd4d2bdd" target="_blank" class="btn-kofi">☕ Ko-fi PRO</a>
+  <div class="hdr-code">
+    <input type="password" id="code" placeholder="Código PRO…" autocomplete="off">
+    <button onclick="checkCode()">OK</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="hero-img"
+    src="https://images-assets.nasa.gov/image/iss040e078907/iss040e078907~orig.jpg"
+    alt="Astronauta en maniobra extravehicular en la ISS"
+    onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(160deg,#040816 0%,#0d1535 50%,#060b1e 100%)'">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">2º Bachillerato · PAU CyL · Tecnología e Ingeniería II</div>
+    <h1 class="hero-title">Aprende<br><em>jugando</em><br>con la física</h1>
+    <p class="hero-desc">Simuladores interactivos y apuntes visuales para preparar la PAU. Diseñados para entender, no para memorizar.</p>
+    <div class="hero-pills">
+      <span class="pill"><span class="pill-dot" style="background:#2ECC8A"></span>3 módulos gratuitos</span>
+      <span class="pill"><span class="pill-dot" style="background:#E8C840"></span>4 módulos PRO</span>
+      <span class="pill"><span class="pill-dot" style="background:#4B6BFB"></span>PAU 2025</span>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<div class="page">
+
+  <!-- MÓDULOS GRATUITOS -->
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <span class="section-title">Acceso libre</span>
+    <span class="section-line"></span>
+  </div>
+
+  <div class="grid-free">
+
+    <!-- Motores -->
+    <div class="mod-card">
+      <img class="mod-img"
+        src="https://images-assets.nasa.gov/image/GRC-2017-C-06025/GRC-2017-C-06025~orig.jpg"
+        alt="Motor"
+        onerror="this.outerHTML='<div class=\'mod-img-placeholder\' style=\'background:#1a0f06\'>🔥</div>'">
+      <div class="mod-body">
+        <div class="mod-meta">
+          <span class="mod-num">01</span>
+          <span class="mod-tag tag-free">Gratis</span>
+        </div>
+        <div class="mod-title">Motores Otto vs Diesel</div>
+        <p class="mod-desc">Simulación animada de los 4 tiempos. Cálculo de eficiencia térmica con parámetros ajustables en tiempo real.</p>
+      </div>
+      <div class="mod-foot">
+        <a href="motores-otto-diesel.html" class="mod-link link-orange">Abrir simulador <span class="arrow">→</span></a>
+      </div>
+    </div>
+
+    <!-- IA -->
+    <div class="mod-card">
+      <img class="mod-img"
+        src="https://images-assets.nasa.gov/image/iss062e129303/iss062e129303~orig.jpg"
+        alt="Inteligencia Artificial"
+        onerror="this.outerHTML='<div class=\'mod-img-placeholder\' style=\'background:#0d0a1a\'>🤖</div>'">
+      <div class="mod-body">
+        <div class="mod-meta">
+          <span class="mod-num">02</span>
+          <span class="mod-tag tag-free">Gratis</span>
+        </div>
+        <div class="mod-title">Inteligencia Artificial</div>
+        <p class="mod-desc">Los 4 pilares de la IA para la PAU: aprendizaje automático, redes neuronales, ética y aplicaciones.</p>
+      </div>
+      <div class="mod-foot">
+        <button onclick="abrirIA()" class="mod-link link-indigo">Ver apuntes <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- Electrónica -->
+    <div class="mod-card">
+      <img class="mod-img"
+        src="https://images-assets.nasa.gov/image/jsc2019e038246/jsc2019e038246~orig.jpg"
+        alt="Electrónica Digital"
+        onerror="this.outerHTML='<div class=\'mod-img-placeholder\' style=\'background:#060c1a\'>🔌</div>'">
+      <div class="mod-body">
+        <div class="mod-meta">
+          <span class="mod-num">03</span>
+          <span class="mod-tag tag-free">Gratis</span>
+        </div>
+        <div class="mod-title">Electrónica Digital</div>
+        <p class="mod-desc">Simplificación con mapas de Karnaugh. Síntesis de circuitos con puertas universales NAND y NOR.</p>
+      </div>
+      <div class="mod-foot">
+        <a href="digital-lab.html" class="mod-link link-blue">Abrir simulador <span class="arrow">→</span></a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PRO STRIP -->
+  <div class="pro-strip">
+    <div class="pro-strip-icon">☕</div>
+    <div class="pro-strip-text">
+      <strong>Desbloquea los 4 módulos PRO</strong>
+      <span>Apoya con un café en Ko-fi · Recibes el código al momento · Acceso de por vida</span>
+    </div>
+    <a href="https://ko-fi.com/s/2bfd4d2bdd" target="_blank" class="btn-pro">Hazte PRO →</a>
+  </div>
+
+  <!-- MÓDULOS PRO -->
+  <div class="section-head" style="padding-top:1.5rem">
+    <span class="section-num">02</span>
+    <span class="section-title">Plan PRO</span>
+    <span class="section-line"></span>
+  </div>
+
+  <div class="grid-pro">
+
+    <!-- Tracción -->
+    <div class="mod-card locked" onclick="handleProClick()">
+      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#0f0a05 0%,#1a1005 100%); filter:brightness(0.6)">💪</div>
+      <div class="mod-body" style="opacity:.5">
+        <div class="mod-meta">
+          <span class="mod-num">04</span>
+          <span class="mod-tag tag-pro">PRO</span>
+        </div>
+        <div class="mod-title">Ensayo de Tracción</div>
+        <p class="mod-desc">Simulación dinámica de comportamiento mecánico y curva tensión-deformación σ-ε interactiva.</p>
+      </div>
+      <div class="mod-foot">
+        <span class="mod-link link-locked">🔒 Bloqueado</span>
+      </div>
+    </div>
+
+    <!-- RLC -->
+    <div class="mod-card locked" onclick="handleProClick()">
+      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#050a14 0%,#0a1020 100%); filter:brightness(0.6)">⚡</div>
+      <div class="mod-body" style="opacity:.5">
+        <div class="mod-meta">
+          <span class="mod-num">05</span>
+          <span class="mod-tag tag-pro">PRO</span>
+        </div>
+        <div class="mod-title">Circuitos RLC</div>
+        <p class="mod-desc">Visualización de fasores en tiempo real y calculadora de impedancias para circuitos serie y paralelo.</p>
+      </div>
+      <div class="mod-foot">
+        <span class="mod-link link-locked">🔒 Bloqueado</span>
+      </div>
+    </div>
+
+    <!-- Vigas -->
+    <div class="mod-card locked" onclick="handleProClick()">
+      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#060b08 0%,#0c1510 100%); filter:brightness(0.6)">🏗️</div>
+      <div class="mod-body" style="opacity:.5">
+        <div class="mod-meta">
+          <span class="mod-num">06</span>
+          <span class="mod-tag tag-pro">PRO</span>
+        </div>
+        <div class="mod-title">Diagramas de Vigas</div>
+        <p class="mod-desc">Cálculo de reacciones en apoyos y generación automática de diagramas de cortante y flector.</p>
+      </div>
+      <div class="mod-foot">
+        <span class="mod-link link-locked">🔒 Bloqueado</span>
+      </div>
+    </div>
+
+    <!-- Automática -->
+    <div class="mod-card locked" onclick="handleProClick()">
+      <div class="mod-img-placeholder" style="background:linear-gradient(135deg,#0a0805 0%,#160f06 100%); filter:brightness(0.6)">⚙️</div>
+      <div class="mod-body" style="opacity:.5">
+        <div class="mod-meta">
+          <span class="mod-num">07</span>
+          <span class="mod-tag tag-pro">PRO</span>
+        </div>
+        <div class="mod-title">Automática</div>
+        <p class="mod-desc">Funciones de transferencia, topologías de control y respuesta al escalón en lazo abierto y cerrado.</p>
+      </div>
+      <div class="mod-foot">
+        <span class="mod-link link-locked">🔒 Bloqueado</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>Apps Tecnología e Ingeniería II — 2º Bachillerato PAU CyL</span>
+  <span>Hecho con ☕ para alumnos que quieren aprobar</span>
+</footer>
+
+<!-- MODAL IA -->
+<div id="ia-modal">
+  <div class="modal-panel">
+    <div class="modal-hdr">
+      <span class="modal-hdr-title">🤖 Inteligencia Artificial — Apuntes PAU</span>
+      <button class="modal-close" onclick="cerrarIA()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pillar">
+        <div class="pillar-hdr"><span class="pillar-num">01</span><h3>¿Qué es la Inteligencia Artificial?</h3></div>
+        <p>La IA es la rama de la informática que desarrolla sistemas capaces de realizar tareas que normalmente requieren inteligencia humana: reconocer imágenes, entender lenguaje, tomar decisiones o aprender de datos.</p>
+        <ul>
+          <li><strong>IA débil (estrecha):</strong> diseñada para una tarea específica. Ej: Siri, recomendadores de Netflix.</li>
+          <li><strong>IA general (fuerte):</strong> hipotética, capaz de razonar en cualquier dominio como un humano.</li>
+          <li><strong>IA generativa:</strong> crea contenido nuevo (texto, imágenes, código). Ej: ChatGPT, Dall-E.</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-hdr"><span class="pillar-num">02</span><h3>Aprendizaje Automático (Machine Learning)</h3></div>
+        <p>El ML permite que los sistemas aprendan de datos sin ser programados explícitamente. El modelo ajusta sus parámetros para minimizar el error en sus predicciones.</p>
+        <ul>
+          <li><strong>Supervisado:</strong> se entrena con datos etiquetados. Ej: clasificar spam, predecir precios.</li>
+          <li><strong>No supervisado:</strong> encuentra patrones sin etiquetas. Ej: segmentación de clientes.</li>
+          <li><strong>Por refuerzo:</strong> el agente aprende por ensayo-error recibiendo recompensas. Ej: juegos, robótica.</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-hdr"><span class="pillar-num">03</span><h3>Redes Neuronales y Deep Learning</h3></div>
+        <p>Las redes neuronales artificiales imitan el funcionamiento del cerebro con capas de neuronas interconectadas. El deep learning usa redes muy profundas para aprender representaciones complejas.</p>
+        <ul>
+          <li><strong>Neurona:</strong> recibe entradas, aplica pesos, suma y pasa por una función de activación (ReLU, sigmoide).</li>
+          <li><strong>CNN:</strong> redes convolucionales, ideales para imágenes y vídeo.</li>
+          <li><strong>RNN / Transformers:</strong> para secuencias de datos: texto, audio, series temporales.</li>
+          <li><strong>Backpropagation:</strong> algoritmo que ajusta los pesos propagando el error hacia atrás.</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-hdr"><span class="pillar-num">04</span><h3>Ética, Sesgos e Impacto Social</h3></div>
+        <p>La IA plantea retos éticos fundamentales que la PAU suele preguntar:</p>
+        <ul>
+          <li><strong>Sesgo algorítmico:</strong> si los datos de entrenamiento son sesgados, el modelo también lo será.</li>
+          <li><strong>Transparencia (IA explicable):</strong> necesidad de entender por qué un sistema toma una decisión.</li>
+          <li><strong>Privacidad:</strong> los modelos pueden memorizar datos personales del entrenamiento.</li>
+          <li><strong>Impacto laboral:</strong> automatización de empleos rutinarios; nuevos roles tecnológicos.</li>
+          <li><strong>Regulación:</strong> la UE aprobó el AI Act (2024), primera ley global de IA por niveles de riesgo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PRO_CODE = "2213";
+
+  function handleProClick() {
+    if (confirm("Este módulo es PRO.\n\n¿Quieres desbloquearlo apoyando con un café en Ko-fi?")) {
+      window.open("https://ko-fi.com/s/2bfd4d2bdd", "_blank");
+    }
+  }
+
+  function activatePro() {
+    document.querySelectorAll('.mod-card.locked').forEach(card => {
+      card.classList.remove('locked');
+      card.onclick = null;
+      const body = card.querySelector('.mod-body');
+      const foot = card.querySelector('.mod-foot');
+      const tag  = card.querySelector('.mod-tag');
+      const img  = card.querySelector('.mod-img-placeholder');
+      if (body) body.style.opacity = '1';
+      if (img)  img.style.filter   = 'brightness(1)';
+      if (tag)  { tag.classList.replace('tag-pro','tag-free'); tag.textContent = 'PRO ✓'; }
+      if (foot) foot.innerHTML = `<button class="mod-link link-indigo" onclick="alert('Módulo desbloqueado. Enlaza aquí tu simulador.')">Abrir simulador <span class="arrow">→</span></button>`;
+    });
+    document.getElementById("code").value = "";
+  }
+
+  function checkCode() {
+    const val = document.getElementById("code").value.trim();
+    if (val === PRO_CODE) {
+      sessionStorage.setItem("pau_pro", "true");
+      activatePro();
+    } else {
+      const input = document.getElementById("code");
+      input.style.color = "#e05252";
+      setTimeout(() => { input.style.color = ""; input.value = ""; }, 900);
+    }
+  }
+
+  function abrirIA() {
+    document.getElementById("ia-modal").classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function cerrarIA() {
+    document.getElementById("ia-modal").classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  document.getElementById("ia-modal").addEventListener("click", e => { if (e.target === document.getElementById("ia-modal")) cerrarIA(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarIA(); });
+  document.getElementById("code").addEventListener("keydown", e => { if (e.key === "Enter") checkCode(); });
+
+  if (sessionStorage.getItem("pau_pro") === "true") activatePro();
+</script>
+</body>
+</html>

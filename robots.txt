@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://josmaveg.github.io/apps-tecnologia-pau/sitemap.xml

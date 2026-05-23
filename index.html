@@ -424,7 +424,7 @@ footer {
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-eyebrow">2º Bachillerato · PAU CyL · Tecnología e Ingeniería II</div>
-    <h1 class="hero-title">Simulador<br><em>de Tecnología</em><br>e Ingeniería II</h1>
+    <h1 class="hero-title">Simulador<br><em>de</em><br>Tecnología e Ingeniería II</h1>
     <p class="hero-desc">Simuladores interactivos y apuntes visuales para preparar la PAU. Diseñados para entender, no para memorizar.</p>
     <div class="hero-pills">
       <span class="pill"><span class="pill-dot" style="background:#2ECC8A"></span>3 módulos gratuitos</span>
@@ -651,6 +651,14 @@ footer {
 <script>
   const PRO_CODE = "2213";
 
+  // Mapeo de títulos a sus archivos correspondientes
+  const URL_MAP = {
+      "Ensayo de Tracción": "ensayo-traccion.html",
+      "Circuitos RLC": "circuitos-rlc.html",
+      "Diagramas de Vigas": "diagramas-vigas.html",
+      "Automática": "automatica.html"
+  };
+
   function handleProClick() {
     if (confirm("Este módulo es PRO.\n\n¿Quieres desbloquearlo apoyando con un café en Ko-fi?")) {
       window.open("https://ko-fi.com/s/2bfd4d2bdd", "_blank");
@@ -661,14 +669,19 @@ footer {
     document.querySelectorAll('.mod-card.locked').forEach(card => {
       card.classList.remove('locked');
       card.onclick = null;
+      
       const body = card.querySelector('.mod-body');
       const foot = card.querySelector('.mod-foot');
       const tag  = card.querySelector('.mod-tag');
       const img  = card.querySelector('.mod-img-placeholder');
+      const title = card.querySelector('.mod-title').textContent.trim();
+      const targetUrl = URL_MAP[title] || "#";
+
       if (body) body.style.opacity = '1';
       if (img)  img.style.filter   = 'brightness(1)';
       if (tag)  { tag.classList.replace('tag-pro','tag-free'); tag.textContent = 'PRO ✓'; }
-      if (foot) foot.innerHTML = `<button class="mod-link link-indigo" onclick="alert('Módulo desbloqueado. Enlaza aquí tu simulador.')">Abrir simulador <span class="arrow">→</span></button>`;
+      
+      if (foot) foot.innerHTML = `<a href="${targetUrl}" class="mod-link link-indigo">Abrir simulador <span class="arrow">→</span></a>`;
     });
     document.getElementById("code").value = "";
   }

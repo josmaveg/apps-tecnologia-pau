@@ -331,6 +331,12 @@ header {
 <div id="ia-modal"><div class="modal-panel"><div class="modal-hdr"><span>IA</span><button class="modal-close" onclick="cerrarIA()">✕</button></div><div class="modal-body">Contenido...</div></div></div>
 
 <script>
+  
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.onkeydown = function(e) {
+  if(e.keyCode == 123) return false; // Desactiva F12
+  if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Desactiva Ctrl+Shift+I
+}
 const PRO_CODE = "2213";
   const URL_MAP = {
       "Ensayo de Tracción": "ensayo-traccion.html",
